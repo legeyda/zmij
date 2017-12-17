@@ -27,5 +27,12 @@ public class JsonPatternFactoryTest {
 				new Value<>("he\"llo")
 		).run();
 
+		new CharPatternCase<>(
+				new JsonPatternFactory().get(),
+				"\"hal\\u00FC\"",
+				new Value<>("hal\u00FC")
+		).run();
+
+
 	}
 }
