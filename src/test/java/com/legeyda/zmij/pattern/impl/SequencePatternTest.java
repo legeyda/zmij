@@ -22,16 +22,13 @@ public class SequencePatternTest {
 		final Pattern<Character, Tree> b = new ConstantPattern<>(new CharSequenceList("b"));
 		final Pattern<Character, Tree> c = new ConstantPattern<>(new CharSequenceList("c"));
 
-		final Value<Tree> ok = new Value<>(new Branch(Tag.SEQUENCE, Arrays.asList(
-				new ValuedLeaf(Tag.RESULT, new ValuedLeaf(Tag.TOKEN, new CharSequenceList("a"))),
-				new ValuedLeaf(Tag.RESULT, new ValuedLeaf(Tag.TOKEN, new CharSequenceList("b"))),
-				new ValuedLeaf(Tag.RESULT, new ValuedLeaf(Tag.TOKEN, new CharSequenceList("c")))
-		)));
-
 		new CharPatternCase<>(
 				new SequencePattern<>(a, b, c),
 				"abc",
-				ok
+				new Value<>(new Branch(Tag.SEQUENCE, Arrays.asList(
+						new ValuedLeaf(Tag.TOKEN, new CharSequenceList("a")),
+						new ValuedLeaf(Tag.TOKEN, new CharSequenceList("b")),
+						new ValuedLeaf(Tag.TOKEN, new CharSequenceList("c")))))
 		).run();
 
 		new CharPatternCase<>(

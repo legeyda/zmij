@@ -31,7 +31,7 @@ public class RepeatPatternTest {
 		new CharPatternCase<>(
 				new RepeatPattern<>(a, 3L, 4L, false),
 				"aaaabc",
-				new Value<>(new Branch(Tag.REPEAT, Arrays.asList(aTree, aTree, aTree)))
+				new Value<>(new Branch(Tag.REPEAT, Arrays.asList(aTree, aTree, aTree, aTree)))
 		).run();
 
 		new CharPatternCase<>(

@@ -8,6 +8,7 @@ import com.legeyda.zmij.result.Result;
 import com.legeyda.zmij.result.Value;
 import com.legeyda.zmij.tree.Tag;
 import com.legeyda.zmij.tree.Tree;
+import com.legeyda.zmij.tree.Trees;
 import com.legeyda.zmij.tree.impl.Branch;
 import com.legeyda.zmij.tree.impl.ValuedLeaf;
 
@@ -37,7 +38,8 @@ public class RepeatPattern<T> extends BaseDescriptionPattern<T, Tree> {
 			final List<Tree> found = new LinkedList<>();
 			Result<?> result;
 			while((result = passage.get()).isPresent()) {
-				found.add(new ValuedLeaf(Tag.REPEAT_ITEM, result.value()));
+				found.add(Trees.from(Tag.REPEAT_ITEM, result.value()));
+
 				if(!this.greedy && this.maxOccurs == found.size()) {
 					break;
 				}
