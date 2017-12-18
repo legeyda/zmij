@@ -1,5 +1,6 @@
 package com.legeyda.zmij.pattern.impl.fluent;
 
+import com.google.common.base.Strings;
 import com.legeyda.zmij.input.ParsingContext;
 import com.legeyda.zmij.passage.Passage;
 import com.legeyda.zmij.pattern.FluentPattern;
@@ -18,14 +19,14 @@ public abstract class FluentPatternBase<T, R> implements FluentPattern<T, R> {
 	}
 
 	public FluentPatternBase(Pattern<T, R> pattern) {
-		this(pattern.description(), pattern);
+		this("", pattern);
 	}
 
 	// input
 
 	@Override
 	public String description() {
-		return this.description;
+		return !Strings.isNullOrEmpty(this.description) ? this.description : this.pattern.description();
 	}
 
 	@Override

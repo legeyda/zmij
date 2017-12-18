@@ -5,7 +5,11 @@ import com.legeyda.zmij.pattern.Pattern;
 import com.legeyda.zmij.pattern.impl.AnyOfPattern;
 import com.legeyda.zmij.pattern.impl.ButPattern;
 import com.legeyda.zmij.pattern.impl.SequencePattern;
+import com.legeyda.zmij.transform.CollectValues;
+import com.legeyda.zmij.tree.Tag;
 import com.legeyda.zmij.tree.Tree;
+import com.legeyda.zmij.tree.Trees;
+import com.legeyda.zmij.tree.impl.EmptyTree;
 
 import java.util.*;
 import java.util.function.Function;
@@ -48,9 +52,28 @@ public class FluentPatternImpl<T, R> extends FluentPatternBase<T, R> {
 		return new FluentPatternImpl<>(new SequencePattern<>(this.pattern));
 	}
 
+
+
+
+
 	@Override
 	public <V> FluentPattern<T, V> transform(final Function<? super R, ? extends V> function) {
 		return new TransformedFluentPattern<>(this.description, this.pattern, function);
+	}
+
+	@Override
+	public FluentPattern<T, List<?>> collectValues() {
+		return this.transform(something -> CollectValues.INSTANCE.apply(Trees.from(Tag.RESULT, something)));
+	}
+
+	@Override
+	public <RR> FluentPattern<T, RR> save(final RR value) {
+		return new TransformedFluentPattern<>(this.description, this.pattern, whatever->value);
+	}
+
+	@Override
+	public FluentPattern<T, Tree> forget() {
+		return new TransformedFluentPattern<>(this.description, this.pattern, whatever-> EmptyTree.INSTANCE);
 	}
 
 }

@@ -14,13 +14,17 @@ import com.legeyda.zmij.tree.impl.ValuedLeaf;
 import java.util.LinkedList;
 import java.util.List;
 
-public class ZeroOrMorePattern<T> extends BaseDescriptionPattern<T, Tree> {
+public class ZeroOrMorePattern<T> extends BasePattern<T, Tree> {
 
 	private final Pattern<T, ?> pattern;
 
 	public ZeroOrMorePattern(Pattern<T, ?> pattern) {
-		super(String.format("zero or more of %s", pattern.description()));
 		this.pattern = pattern;
+	}
+
+	@Override
+	public String description() {
+		return String.format("zero or more of %s", pattern.description());
 	}
 
 	@Override
@@ -35,4 +39,5 @@ public class ZeroOrMorePattern<T> extends BaseDescriptionPattern<T, Tree> {
 			return new Value<>(new Branch(Tag.REPEAT, children));
 		});
 	}
+
 }

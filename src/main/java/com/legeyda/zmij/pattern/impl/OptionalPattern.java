@@ -14,13 +14,17 @@ import com.legeyda.zmij.tree.impl.ValuelessLeaf;
 import com.legeyda.zmij.util.Try;
 import com.legeyda.zmij.util.Util;
 
-public class OptionalPattern<T, R> extends BaseDescriptionPattern<T, Tree> {
+public class OptionalPattern<T, R> extends BasePattern<T, Tree> {
 
 	private final Pattern<T, R> pattern;
 
 	public OptionalPattern(final Pattern<T, R> pattern) {
-		super(String.format("optional\n%s", Util.indent(pattern.description())));
 		this.pattern = pattern;
+	}
+
+	@Override
+	public String description() {
+		return String.format("optional\n%s", Util.indent(pattern.description()));
 	}
 
 	@Override

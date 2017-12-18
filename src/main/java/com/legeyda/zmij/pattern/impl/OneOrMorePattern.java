@@ -15,13 +15,17 @@ import com.legeyda.zmij.util.Util;
 import java.util.LinkedList;
 import java.util.List;
 
-public class OneOrMorePattern<T> extends BaseDescriptionPattern<T, Tree> {
+public class OneOrMorePattern<T> extends BasePattern<T, Tree> {
 
 	private final Pattern<T, ?> pattern;
 
 	public OneOrMorePattern(Pattern<T, ?> pattern) {
-		super(String.format("one or more of\n%s", Util.indent(pattern.description())));
 		this.pattern = pattern;
+	}
+
+	@Override
+	public String description() {
+		return String.format("one or more of\n%s", Util.indent(pattern.description()));
 	}
 
 	@Override

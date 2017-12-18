@@ -1,6 +1,7 @@
 package com.legeyda.zmij.pattern.impl;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.Streams;
 import com.legeyda.zmij.input.ParsingContext;
 import com.legeyda.zmij.input.Savepoint;
 import com.legeyda.zmij.passage.Passage;
@@ -14,14 +15,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-public class AnyOfPattern<T, R> extends BaseDescriptionPattern<T, R> {
+public class AnyOfPattern<T, R> extends BasePattern<T, R> {
 
 	private final Iterable<Pattern<T, ? extends R>> choices;
 
 	@SafeVarargs
 	public AnyOfPattern(Pattern<T, ? extends R> ... choices) {
-		super(String.format("any of:\n%s", Util.indent(Joiner.on(", \n").skipNulls().join(
-				Arrays.stream(choices).map(Pattern::description).collect(Collectors.toList())))));
 		this.choices = Arrays.asList(choices);
 	}
 
@@ -45,4 +44,9 @@ public class AnyOfPattern<T, R> extends BaseDescriptionPattern<T, R> {
 		});
 	}
 
+	@Override
+	public String description() {
+		return String.format("any of:\n%s", Util.indent(Joiner.on(", \n").skipNulls().join(
+				Streams.stream(choices).map(Pattern::description).collect(Collectors.toList()))));
+	}
 }

@@ -17,19 +17,11 @@ import com.legeyda.zmij.util.Pair;
 
 import java.util.*;
 
-public class SequencePattern<T> extends BaseDescriptionPattern<T, Tree> {
-
-	private static <T> String createDescription(final Iterable<Pattern<T, ?>> patterns) {
-		return "["
-				+ Joiner.on(" ").skipNulls().join(Streams.stream(patterns).map(
-				Pattern::description).iterator())
-				+ "]";
-	}
+public class SequencePattern<T> extends BasePattern<T, Tree> {
 
 	private Iterable<Pattern<T, ?>> elements;
 
 	public SequencePattern(final Iterable<Pattern<T, ?>> patterns) {
-		super(createDescription(patterns));
 		this.elements = patterns;
 	}
 
@@ -53,5 +45,13 @@ public class SequencePattern<T> extends BaseDescriptionPattern<T, Tree> {
 			}
 			return new Value<>(new Branch(Tag.SEQUENCE, result));
 		});
+	}
+
+	@Override
+	public String description() {
+		return "["
+				+ Joiner.on(" ").skipNulls().join(Streams.stream(elements).map(
+				Pattern::description).iterator())
+				+ "]";
 	}
 }

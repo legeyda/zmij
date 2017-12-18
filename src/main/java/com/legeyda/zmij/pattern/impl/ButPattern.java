@@ -9,14 +9,18 @@ import com.legeyda.zmij.result.Result;
 import com.legeyda.zmij.util.Try;
 
 
-public class ButPattern<T, R> extends BaseDescriptionPattern<T, R> {
+public class ButPattern<T, R> extends BasePattern<T, R> {
 	private final Pattern<T, R> shouldMatch;
 	private final Pattern<T, ?> shouldNotMatch;
 
 	public ButPattern(Pattern<T, R> shouldMatch, Pattern<T, ?> shouldNotMatch) {
-		super(String.format("%s but %s", shouldMatch.description(), shouldNotMatch.description()));
 		this.shouldMatch = shouldMatch;
 		this.shouldNotMatch = shouldNotMatch;
+	}
+
+	@Override
+	public String description() {
+		return String.format("%s but %s", shouldMatch.description(), shouldNotMatch.description());
 	}
 
 	@Override
@@ -46,4 +50,5 @@ public class ButPattern<T, R> extends BaseDescriptionPattern<T, R> {
 			}
 		}).apply(input.savepoint()));
 	}
+
 }

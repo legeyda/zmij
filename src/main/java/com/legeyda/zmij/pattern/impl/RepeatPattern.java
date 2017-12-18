@@ -16,7 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 /** match pattern repeatedly based on predicates of match count */
-public class RepeatPattern<T> extends BaseDescriptionPattern<T, Tree> {
+public class RepeatPattern<T> extends BasePattern<T, Tree> {
 
 	private final Pattern<T, ?> pattern;
 	private final Long minOccurs;
@@ -24,11 +24,15 @@ public class RepeatPattern<T> extends BaseDescriptionPattern<T, Tree> {
 	private final boolean greedy;
 
 	public RepeatPattern(Pattern<T, ?> pattern, Long minOccurs, Long maxOccurs, boolean greedy) {
-		super(String.format("%s occurs min %d max %d times", pattern.description(), minOccurs, maxOccurs));
 		this.pattern = pattern;
 		this.minOccurs = minOccurs;
 		this.maxOccurs = maxOccurs;
 		this.greedy = greedy;
+	}
+
+	@Override
+	public String description() {
+		return String.format("%s occurs min %d max %d times", pattern.description(), minOccurs, maxOccurs);
 	}
 
 	@Override
@@ -54,5 +58,4 @@ public class RepeatPattern<T> extends BaseDescriptionPattern<T, Tree> {
 			}
 		});
 	}
-
 }

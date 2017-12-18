@@ -11,21 +11,12 @@ import com.legeyda.zmij.tree.impl.ValuedLeaf;
 
 import java.util.Arrays;
 
-public class ConstantPattern<T> extends BaseDescriptionPattern<T, Tree> {
+public class ConstantPattern<T> extends BasePattern<T, Tree> {
 
 	final Iterable<T> pattern;
 
-	private static String createDescription(final Iterable<?> pattern) {
-		return String.format("%s", pattern)
-				.replace("\b", "\\b")
-				.replace("\f", "\\f")
-				.replace("\n", "\\n")
-				.replace("\t", "\\t")
-				.replace("\r", "\\r");
-	}
 
 	public ConstantPattern(final Iterable<T> pattern) {
-		super(createDescription(pattern));
 		if(0 == Iterables.size(pattern)) {
 			throw new IllegalArgumentException(String.format("pattern size is %d", Iterables.size(pattern)));
 		}
@@ -49,4 +40,13 @@ public class ConstantPattern<T> extends BaseDescriptionPattern<T, Tree> {
 		});
 	}
 
+	@Override
+	public String description() {
+		return String.format("%s", pattern)
+				.replace("\b", "\\b")
+				.replace("\f", "\\f")
+				.replace("\n", "\\n")
+				.replace("\t", "\\t")
+				.replace("\r", "\\r");
+	}
 }
