@@ -62,7 +62,7 @@ public class FluentPatternImpl<T, R> extends FluentPatternBase<T, R> {
 	}
 
 	@Override
-	public FluentPattern<T, List<?>> collectValues() {
+	public FluentPattern<T, List<Object>> collectValues() {
 		return this.transform(something -> CollectValues.INSTANCE.apply(Trees.from(Tag.RESULT, something)));
 	}
 

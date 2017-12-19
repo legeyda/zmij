@@ -88,7 +88,7 @@ public class TransformedFluentPattern<T, R, RR> implements FluentPattern<T, RR> 
 	}
 
 	@Override
-	public FluentPattern<T, List<?>> collectValues() {
+	public FluentPattern<T, List<Object>> collectValues() {
 		return this.transform(something -> CollectValues.INSTANCE.apply(Trees.from(Tag.RESULT, something)));
 	}
 

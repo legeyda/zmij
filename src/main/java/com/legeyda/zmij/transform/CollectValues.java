@@ -11,7 +11,7 @@ public class CollectValues implements Function<Tree, List<?>> {
 	public static final CollectValues INSTANCE = new CollectValues();
 
 	@Override
-	public List<?> apply(Tree tree) {
+	public List<Object> apply(Tree tree) {
 		final List<Object> result = new LinkedList<>();
 		if(tree.value().isPresent()) {
 			result.add(tree.value().get());

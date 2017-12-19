@@ -47,8 +47,8 @@ public abstract class BasePatternFactory<T, R> implements PatternFactory<T, R> {
 		return this.fluent(this.wrap(new AnyOfPattern<>(choices)));
 	}
 
-	protected <V> PatternDeclaration<T, V> declare() {
-		return new PatternDeclarationImpl<>();
+	protected <V> PatternDeclaration<T, V> declare(final String description) {
+		return new PatternDeclarationImpl<>(description);
 	}
 
 	@SafeVarargs

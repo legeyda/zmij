@@ -1,20 +1,13 @@
 package com.legeyda.json;
 
 import com.legeyda.zmij.impl.BaseCharacterPatternFactory;
-import com.legeyda.zmij.pattern.FluentPattern;
 import com.legeyda.zmij.pattern.Pattern;
 import com.legeyda.zmij.pattern.PatternDeclaration;
-import com.legeyda.zmij.transform.CollectValues;
-import com.legeyda.zmij.tree.Tag;
 import com.legeyda.zmij.tree.Tree;
 import com.legeyda.zmij.tree.Trees;
-import com.legeyda.zmij.tree.impl.EmptyTree;
 import com.legeyda.zmij.util.ListCharSequence;
 
-import java.util.AbstractMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 
@@ -22,20 +15,18 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 	@Override
 	public Pattern<Character, Object> get() {
 
-		// value involves circular dependencies, so declare now and implement later
-		PatternDeclaration<Character, Object> value = declare();
+		// since it's circular dependency, declare now, implement later
+		PatternDeclaration<Character, Object> value = declare("javascript value");
 
 
 
 		// ======== simple patterns ========
-		final Pattern<Character, Tree> space          = constant(' ');
-		final Pattern<Character, Tree> tab            = constant('\t');
-		final Pattern<Character, Tree> newLine        = constant('\n');
-		final Pattern<Character, Tree> carriageReturn = constant('\r');
-		final Pattern<Character, Tree> whiteChar      = anyOf(space, tab, newLine, carriageReturn).description("any white character");
-		final Pattern<Character, Tree> optWhiteSpace  =
+		final Pattern<Character, Tree> whiteChar = whiteList(' ', '\t', '\n', '\r').description("any white character");
+		final Pattern<Character, Tree> optWhiteSpace =
 				zeroOrMore(whiteChar).description("optional white space").forget();
-		final Pattern<Character, Tree> comma  = sequence(optWhiteSpace, constant(','), optWhiteSpace).forget();
+		final Pattern<Character, Tree> comma  = sequence(optWhiteSpace, constant(','), optWhiteSpace)
+				.description("comma")
+				.forget();
 
 
 
@@ -45,7 +36,8 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 				constant("\\u").forget(),
 				repeat(whiteList("0123456789ABCDEF"), 4L, 4L, false)
 		).collectValues()
-				.transform((list) -> (char)Long.parseLong("" + new ListCharSequence((List<Character>)list), 16));
+				.transform((list) -> (char)Long.parseLong("" + new ListCharSequence((List<Character>)(List)list), 16))
+				.description("unicode code");
 
 		final Pattern<Character,  Character> character = anyOf(
 				blackList('\\', '"').transform(t->(Character)t.value().get()),
@@ -58,18 +50,20 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 				constant("\\r") .save('\r'),
 				constant("\\t") .save('\t'),
 				unicodeCode
-		);
+		).description("single character");
 
 		final Pattern<Character, String> string = sequence(
 				optWhiteSpace, constant('"'), zeroOrMore(character), constant('"'), optWhiteSpace
-		).transform(seq -> "" + new ListCharSequence(Trees.childValues(seq.children().get(2))));
+		).transform(seq -> "" + new ListCharSequence(Trees.childValues(seq.children().get(2))))
+				.description("json string");
 
 
 
 
 		// ======== array ========
-		final Pattern<Character, List<?>> elements =
-				sequence(value, zeroOrMore(sequence(comma, value))).collectValues();
+		final Pattern<Character, List<Object>> elements = sequence(value, zeroOrMore(sequence(comma, value)))
+				.description("json array elements")
+				.collectValues();
 
 		final Pattern<Character, List<?>> array = sequence(
 				optWhiteSpace,
@@ -79,22 +73,39 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 				optWhiteSpace,
 				constant("]"),
 				optWhiteSpace
-		).transform(seq -> (List<?>)seq.children().get(3).value().orElse(new LinkedList<>()));
+		)
+				.description("json array")
+				.transform(seq -> (List<?>)seq.children().get(3).value().orElse(new LinkedList<>()));
 
 
 		// ======== object ========
-		final Pattern<Character, Map.Entry<String, ?>> member =
-				sequence(optWhiteSpace, string, optWhiteSpace, constant(':'), optWhiteSpace, value, optWhiteSpace)
-				.transform(seq -> new AbstractMap.SimpleEntry<>(
-						(String)seq.children().get(2).value().get(),
-						seq.children().get(5).value().get()));
+		final Pattern<Character, Map.Entry<String, Object>> member =
+				sequence(optWhiteSpace, string, optWhiteSpace, constant(':').forget(), optWhiteSpace, value, optWhiteSpace)
+						.collectValues()
+						.transform(list->new AbstractMap.SimpleEntry<>(list.get(0).toString(), list.get(1)));
 
 
+		final Pattern<Character, Map<String, Object>> members = sequence(member, zeroOrMore(sequence(comma, member)))
+				.collectValues()
+				.transform(entries -> {
+					final Map<String, Object> result = new HashMap<>();
+					for(Map.Entry<String, Object> entry: (List<Map.Entry<String, Object>>)(Object)entries) {
+						result.put(entry.getKey(), entry.getValue());
+					}
+					return result;
+				});
 
-//		final Pattern<Character, Map<String, ?>> members = sequence(
-//				member, zeroOrMore(sequence(skip(comma), member))
-//		).collectValues();
-
+		final Pattern<Character, Map<String, Object>> object = sequence(
+				optWhiteSpace,
+				constant("{"),
+				optWhiteSpace,
+				optional(members),
+				optWhiteSpace,
+				constant("}"),
+				optWhiteSpace
+		)
+				.description("json object")
+				.transform(seq -> (Map<String, Object>)seq.children().get(3).value().orElse(new HashMap<>()));
 
 
 
@@ -107,11 +118,12 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 
 		//
 
-//		value.implement(anyOf(
-//				string, /*number(), object(), */array, truth, lie, nil));
+		value.implement(anyOf(
+				string, /*number(),*/ object, array, truth, lie, nil));
 
-		return (Pattern<Character, Object>)(Pattern)string;
-//return value;
+//		return (Pattern<Character, Object>)(Pattern)string;
+		value.description();
+		return value;
 	}
 
 }

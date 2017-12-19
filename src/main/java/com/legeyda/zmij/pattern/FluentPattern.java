@@ -19,7 +19,7 @@ public interface FluentPattern<T, R> extends Pattern<T, R> {
 	<RR> FluentPattern<T, RR> transform(Function<? super R, ? extends RR> function);
 
 	/** recursively walk tree and collect all found values into list */
-	FluentPattern<T, List<?>> collectValues();
+	FluentPattern<T, List<Object>> collectValues();
 
 	/** set constant value to be returned in case of match */
 	<RR> FluentPattern<T, RR> save(RR value);
