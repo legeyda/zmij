@@ -16,31 +16,34 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 	public Pattern<Character, Object> get() {
 
 		// since it's circular dependency, declare now, implement later
-		PatternDeclaration<Character, Object> value = declare("javascript value");
+		PatternDeclaration<Character, Object> value = declare("any piece of data");
 
 
+		final Pattern<Character, Tree> whiteSpace = zeroOrMore(whiteList(' ', '\t', '\n', '\r'))
+				.description("optional white space")
+				.forget();
 
-		// ======== simple patterns ========
-		final Pattern<Character, Tree> whiteChar = whiteList(' ', '\t', '\n', '\r').description("any white character");
-		final Pattern<Character, Tree> optWhiteSpace =
-				zeroOrMore(whiteChar).description("optional white space").forget();
-		final Pattern<Character, Tree> comma  = sequence(optWhiteSpace, constant(','), optWhiteSpace)
+		final Pattern<Character, Tree> comma  = sequence(whiteSpace, constant(','), whiteSpace)
 				.description("comma")
 				.forget();
+		//      .map(empty());
 
 
 
 		// ======== string ========
 
-		final Pattern<Character,  Character> unicodeCode = sequence(
+		final Pattern<Character, ?> doubleQuote = constant('"').forget();
+
+		final Pattern<Character,  Character> unicode = sequence(
 				constant("\\u").forget(),
 				repeat(whiteList("0123456789ABCDEF"), 4L, 4L, false)
-		).collectValues()
-				.transform((list) -> (char)Long.parseLong("" + new ListCharSequence((List<Character>)(List)list), 16))
+		)
+				.listValues()
+				.map((list) -> (char)Long.parseLong("" + new ListCharSequence((List<Character>)(List)list), 16))
 				.description("unicode code");
 
 		final Pattern<Character,  Character> character = anyOf(
-				blackList('\\', '"').transform(t->(Character)t.value().get()),
+				blackList('\\', '"').map(t->(Character)t.value().get()),
 				constant("\\\"").save('"'),
 				constant("\\\\").save('\\'),
 				constant("\\/") .save('/'),
@@ -49,45 +52,101 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 				constant("\\n") .save('\n'),
 				constant("\\r") .save('\r'),
 				constant("\\t") .save('\t'),
-				unicodeCode
+				unicode
 		).description("single character");
 
 		final Pattern<Character, String> string = sequence(
-				optWhiteSpace, constant('"'), zeroOrMore(character), constant('"'), optWhiteSpace
-		).transform(seq -> "" + new ListCharSequence(Trees.childValues(seq.children().get(2))))
-				.description("json string");
+				whiteSpace, doubleQuote, zeroOrMore(character), doubleQuote, whiteSpace
+		)
+//				.listValues()
+//				.map(seq -> "" + new ListCharSequence(Trees.childValues(seq.children().get(2))))
 
+
+				.map(seq -> "" + new ListCharSequence(Trees.childValues(seq.children().get(2))))
+				.description("string");
+
+
+		// ======== number =========
+
+		final Pattern<Character, Character> digit = whiteList("1234567890").value();
+
+		final Pattern<Character, Character> nonZeroDigit = whiteList("123456789").value();
+
+		final Pattern<Character, Long> optSign = optional(whiteList('+', '-'))
+				.optValue()
+				.map(opt->opt.map(s->'-'==(Character)s ? -1L : 1L).orElse(1L));
+		//      .map(value().orElse('+'))
+		//      .map(ch->
+
+		final Pattern<Character, Long> unsignedInteger = sequence(digit, zeroOrMore(nonZeroDigit))
+				.listValues()
+				.map(list->Long.valueOf(new ListCharSequence((List<Character>)(List<?>)list).toString()));
+
+		final Pattern<Character, Long> signedInteger = sequence(optSign, unsignedInteger)
+				.map(seq ->
+						(Long)seq.children().get(0).value().get() * (Long)seq.children().get(1).value().get());
+
+		final Pattern<Character, Double> unsignedFloat = sequence(zeroOrMore(nonZeroDigit), constant('.'), oneOrMore(digit))
+				.listValues()
+				.map(list->Double.valueOf(new ListCharSequence((List<Character>)(List<?>)list).toString()));
+
+		final Pattern<Character, Double> signedFloat = sequence(optSign, unsignedFloat)
+				.map(seq ->
+						(Long)seq.children().get(0).value().get() * (Double)seq.children().get(1).value().get());
+
+
+
+		//final Pattern<Character, Double> floating = sequence(signedInteger, optional());
+
+		final Pattern<Character, Number> jsonNumber = sequence(
+				whiteSpace,
+				anyOf(signedFloat, signedInteger),
+				optional(sequence(
+						whiteList('e', 'E').forget(),
+						signedInteger
+				)),
+				whiteSpace
+		)
+				.listValues()
+				.description("number")
+				.map(list -> {
+					if(list.size()==2) {
+						return ((Number)list.get(0)).doubleValue() * Math.pow(10.0, ((Number)list.get(1)).doubleValue());
+					} else {
+						return (Number)list.get(0);
+					}
+				});
 
 
 
 		// ======== array ========
 		final Pattern<Character, List<Object>> elements = sequence(value, zeroOrMore(sequence(comma, value)))
-				.description("json array elements")
-				.collectValues();
+				.description("array elements")
+				.listValues();
 
 		final Pattern<Character, List<?>> array = sequence(
-				optWhiteSpace,
+				whiteSpace,
 				constant("["),
-				optWhiteSpace,
+				whiteSpace,
 				optional(elements),
-				optWhiteSpace,
+				whiteSpace,
 				constant("]"),
-				optWhiteSpace
+				whiteSpace
 		)
-				.description("json array")
-				.transform(seq -> (List<?>)seq.children().get(3).value().orElse(new LinkedList<>()));
+				.description("array")
+				.map(seq -> (List<?>)seq.children().get(3).value().orElse(new LinkedList<>()));
 
 
 		// ======== object ========
 		final Pattern<Character, Map.Entry<String, Object>> member =
-				sequence(optWhiteSpace, string, optWhiteSpace, constant(':').forget(), optWhiteSpace, value, optWhiteSpace)
-						.collectValues()
-						.transform(list->new AbstractMap.SimpleEntry<>(list.get(0).toString(), list.get(1)));
+				sequence(whiteSpace, string, whiteSpace, constant(':').forget(), whiteSpace, value, whiteSpace)
+						.listValues()
+						.map(list->new AbstractMap.SimpleEntry<>(list.get(0).toString(), list.get(1)));
 
 
 		final Pattern<Character, Map<String, Object>> members = sequence(member, zeroOrMore(sequence(comma, member)))
-				.collectValues()
-				.transform(entries -> {
+				.listValues()
+				.map(entries -> {
 					final Map<String, Object> result = new HashMap<>();
 					for(Map.Entry<String, Object> entry: (List<Map.Entry<String, Object>>)(Object)entries) {
 						result.put(entry.getKey(), entry.getValue());
@@ -96,33 +155,41 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 				});
 
 		final Pattern<Character, Map<String, Object>> object = sequence(
-				optWhiteSpace,
+				whiteSpace,
 				constant("{"),
-				optWhiteSpace,
+				whiteSpace,
 				optional(members),
-				optWhiteSpace,
+				whiteSpace,
 				constant("}"),
-				optWhiteSpace
+				whiteSpace
 		)
-				.description("json object")
-				.transform(seq -> (Map<String, Object>)seq.children().get(3).value().orElse(new HashMap<>()));
+				.description("object")
+				.map(seq -> (Map<String, Object>)seq.children().get(3).value().orElse(new HashMap<>()));
 
 
 
 
 		// ======== simpletons: true, false and null ========
 
-		Pattern<Character, Object> nil = sequence(optWhiteSpace, constant("true"), optWhiteSpace).save(null);
-		Pattern<Character, Object> truth = sequence(optWhiteSpace, constant("true"), optWhiteSpace).save(Boolean.TRUE);
-		Pattern<Character, Object> lie = sequence(optWhiteSpace, constant("false"), optWhiteSpace).save(Boolean.FALSE);
+		Pattern<Character, Object> nil = sequence(whiteSpace, constant("null"), whiteSpace)
+				.description("null")
+				.save(null);
+
+
+		Pattern<Character, Object> truth = sequence(whiteSpace, constant("true"), whiteSpace)
+				.description("true")
+				.save(Boolean.TRUE);
+
+
+		Pattern<Character, Object> lie = sequence(whiteSpace, constant("false"), whiteSpace)
+				.description("false")
+				.save(Boolean.FALSE);
 
 		//
 
 		value.implement(anyOf(
-				string, /*number(),*/ object, array, truth, lie, nil));
+				string, jsonNumber, object, array, truth, lie, nil));
 
-//		return (Pattern<Character, Object>)(Pattern)string;
-		value.description();
 		return value;
 	}
 

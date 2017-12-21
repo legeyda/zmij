@@ -17,7 +17,7 @@ public class Failure<T> implements Result<T> {
 
 	@Override
 	public T value() {
-		throw new IllegalStateException("no value");
+		throw new IllegalStateException("no optValue");
 	}
 
 	@Override

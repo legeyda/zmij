@@ -42,6 +42,6 @@ public abstract class FluentPatternBase<T, R> implements FluentPattern<T, R> {
 	abstract public FluentPattern<T, R> description(String newDescription);
 
 	@Override
-	abstract public <V> FluentPattern<T, V> transform(Function<? super R, ? extends V> function);
+	abstract public <V> FluentPattern<T, V> map(Function<? super R, ? extends V> function);
 
 }

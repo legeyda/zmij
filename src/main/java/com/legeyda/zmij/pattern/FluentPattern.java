@@ -3,6 +3,7 @@ package com.legeyda.zmij.pattern;
 import com.legeyda.zmij.tree.Tree;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 public interface FluentPattern<T, R> extends Pattern<T, R> {
@@ -15,16 +16,36 @@ public interface FluentPattern<T, R> extends Pattern<T, R> {
 
 	// transformation of result to ast or something
 
-	/** transform pattern result to someting other */
-	<RR> FluentPattern<T, RR> transform(Function<? super R, ? extends RR> function);
+	/**
+	 * get new pattern returning the result of applying given function to actual result
+	 *
+	 */
+	<RR> FluentPattern<T, RR> map(Function<? super R, ? extends RR> function);
 
-	/** recursively walk tree and collect all found values into list */
-	FluentPattern<T, List<Object>> collectValues();
+	<RR> FluentPattern<T, RR> value();
 
-	/** set constant value to be returned in case of match */
+	<RR> FluentPattern<T, Optional<RR>> optValue();
+
+	/**
+	 * gets new pattern returning list of all values collected recursively from this pattern result tree
+	 *
+	 */
+	FluentPattern<T, List<Object>> listValues();
+
+	/**
+	 * gets new pattern returning Result with constant predefined optValue, whatever this pattern actually returns
+	 *
+	 * It can be usefull for simple patterns, where exact optValue of result is known
+	 *
+	 */
 	<RR> FluentPattern<T, RR> save(RR value);
 
-	/** forget pattern result and return just empty tree */
+	/**
+	 * gets new pattern returning Result of type EmptyTree, whatever this pattern actually returns
+	 *
+	 * It can be useful to skip some non-sense patterns like white spaces, punctuations etc
+	 *
+	 */
 	FluentPattern<T, Tree> forget();
 
 }

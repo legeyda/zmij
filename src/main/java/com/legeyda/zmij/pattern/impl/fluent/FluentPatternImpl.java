@@ -57,13 +57,23 @@ public class FluentPatternImpl<T, R> extends FluentPatternBase<T, R> {
 
 
 	@Override
-	public <V> FluentPattern<T, V> transform(final Function<? super R, ? extends V> function) {
+	public <V> FluentPattern<T, V> map(final Function<? super R, ? extends V> function) {
 		return new TransformedFluentPattern<>(this.description, this.pattern, function);
 	}
 
 	@Override
-	public FluentPattern<T, List<Object>> collectValues() {
-		return this.transform(something -> CollectValues.INSTANCE.apply(Trees.from(Tag.RESULT, something)));
+	public <V> FluentPattern<T, V> value() {
+		return this.map(tree->(V)Trees.from(Tag.RESULT, tree).value().get());
+	}
+
+	@Override
+	public <V> FluentPattern<T, Optional<V>> optValue() {
+		return this.map(tree->(Optional<V>)Trees.from(Tag.RESULT, tree).value());
+	}
+
+	@Override
+	public FluentPattern<T, List<Object>> listValues() {
+		return this.map(something -> CollectValues.INSTANCE.apply(Trees.from(Tag.RESULT, something)));
 	}
 
 	@Override

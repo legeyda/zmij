@@ -33,9 +33,13 @@ public class Trees {
 	}
 
 	public static Tree from(final Tag tag, final Object anything) {
-		return anything instanceof Tree
-				? (Tree)anything
-				: new ValuedLeaf(Tag.RESULT, anything);
+		if(anything instanceof Tree) {
+			return (Tree)anything;
+		} else if(anything instanceof Iterable) {
+			return from(tag, (Iterable)anything);
+		} else {
+			new ValuedLeaf(Tag.RESULT, anything);
+		}
 	}
 
 	public static <T> List<T> childValues(final Tree tree) {

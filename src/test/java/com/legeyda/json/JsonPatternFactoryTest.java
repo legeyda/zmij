@@ -1,6 +1,7 @@
 package com.legeyda.json;
 
 import com.legeyda.zmij.pattern.CharPatternCase;
+import com.legeyda.zmij.result.Failure;
 import com.legeyda.zmij.result.Value;
 import org.junit.Test;
 
@@ -38,6 +39,33 @@ public class JsonPatternFactoryTest {
 		).run();
 	}
 
+	@Test
+	public void testNumber() {
+
+		new CharPatternCase<>(
+				new JsonPatternFactory().get(),
+				"  42  ",
+				new Value<>(42L)
+		).run();
+
+		new CharPatternCase<>(
+				new JsonPatternFactory().get(),
+				"  42.42  ",
+				new Value<>(42.42D)
+		).run();
+
+		new CharPatternCase<>(
+				new JsonPatternFactory().get(),
+				"  42.42e42  ",
+				new Value<>(42.42e42)
+		).run();
+
+		new CharPatternCase<>(
+				new JsonPatternFactory().get(),
+				"    ",
+				new Failure<>("blabla")
+		).run();
+	}
 
 	@Test
 	public void testArray() {
@@ -72,17 +100,17 @@ public class JsonPatternFactoryTest {
 		).run();
 
 		final HashMap<String, Object> expected = new HashMap<>();
-		expected.put("key", "value");
+		expected.put("key", "optValue");
 		new CharPatternCase<>(
 				new JsonPatternFactory().get(),
-				"{ \"key\"  : \"value\"  }",
+				"{ \"key\"  : \"optValue\"  }",
 				new Value<>(expected)
 		).run();
 
 		expected.put("hello", "world");
 		new CharPatternCase<>(
 				new JsonPatternFactory().get(),
-				"{\"key\":\"value\" , \"hello\":\"world\"}",
+				"{\"key\":\"optValue\" , \"hello\":\"world\"}",
 				new Value<>(expected)
 		).run();
 

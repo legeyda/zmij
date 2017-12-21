@@ -27,7 +27,7 @@ public abstract class BasePatternFactory<T, R> implements PatternFactory<T, R> {
 
 	/** */
 	protected <V> Pattern<T, Tree> skip(Pattern<T, V> pattern) {
-		return this.fluent(pattern).transform(t-> EmptyTree.INSTANCE);
+		return this.fluent(pattern).map(t-> EmptyTree.INSTANCE);
 	}
 
 	protected FluentPattern<T, Tree> constant(Iterable<T> match) {

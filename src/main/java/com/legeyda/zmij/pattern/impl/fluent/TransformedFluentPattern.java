@@ -16,10 +16,7 @@ import com.legeyda.zmij.tree.Trees;
 import com.legeyda.zmij.tree.impl.EmptyTree;
 import com.legeyda.zmij.util.CompositeFunction;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 
 public class TransformedFluentPattern<T, R, RR> implements FluentPattern<T, RR> {
@@ -81,15 +78,26 @@ public class TransformedFluentPattern<T, R, RR> implements FluentPattern<T, RR> 
 
 
 	@Override
-	public <V> FluentPattern<T, V> transform(Function<? super RR, ? extends V> function) {
+	public <V> FluentPattern<T, V> map(Function<? super RR, ? extends V> function) {
 		return new TransformedFluentPattern<>(this.description, this.pattern, new CompositeFunction<R, RR, V>(
 				this.function,
 				function));
 	}
 
+
 	@Override
-	public FluentPattern<T, List<Object>> collectValues() {
-		return this.transform(something -> CollectValues.INSTANCE.apply(Trees.from(Tag.RESULT, something)));
+	public <RR1> FluentPattern<T, RR1> value() {
+		return this.map(tree->(RR1)Trees.from(Tag.RESULT, tree).value().get());
+	}
+
+	@Override
+	public <RR1> FluentPattern<T, Optional<RR1>> optValue() {
+		return this.map(tree->(Optional<RR1>)Trees.from(Tag.RESULT, tree).value());
+	}
+
+	@Override
+	public FluentPattern<T, List<Object>> listValues() {
+		return this.map(something -> CollectValues.INSTANCE.apply(Trees.from(Tag.RESULT, something)));
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import com.legeyda.zmij.passage.impl.SuppliedPassage;
 import com.legeyda.zmij.result.Value;
 import com.legeyda.zmij.tree.Tag;
 import com.legeyda.zmij.tree.Tree;
+import com.legeyda.zmij.tree.Trees;
 import com.legeyda.zmij.tree.impl.ValuedLeaf;
 
 import java.util.Arrays;
@@ -36,7 +37,7 @@ public class ConstantPattern<T> extends BasePattern<T, Tree> {
 				}
 				input.advance();
 			}
-			return new Value<>(new ValuedLeaf(Tag.TOKEN, ConstantPattern.this.pattern));
+			return new Value<>(Trees.from(Tag.TOKEN, ConstantPattern.this.pattern));
 		});
 	}
 

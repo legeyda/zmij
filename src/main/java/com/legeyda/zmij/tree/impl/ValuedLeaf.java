@@ -20,6 +20,6 @@ public class ValuedLeaf extends AbstractLeaf {
 	public String toString() {
 		return "ValuedLeaf{" +
 				"tag=" + this.tag() +
-				", value=" + value + '}';
+				", optValue=" + value + '}';
 	}
 }
