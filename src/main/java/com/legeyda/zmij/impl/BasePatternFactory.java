@@ -9,11 +9,13 @@ import com.legeyda.zmij.pattern.impl.fluent.FluentPatternImpl;
 import com.legeyda.zmij.tree.Tree;
 import com.legeyda.zmij.tree.impl.EmptyTree;
 
+import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 
 public abstract class BasePatternFactory<T, R> implements PatternFactory<T, R> {
 
-	protected <V> FluentPattern<T, V> fluent(final Pattern<T, V> wrapee) {
+	public <V> FluentPattern<T, V> fluent(final Pattern<T, V> wrapee) {
 		return new FluentPatternImpl<>(new MemoizingPattern<>(wrapee));
 	}
 
@@ -21,71 +23,81 @@ public abstract class BasePatternFactory<T, R> implements PatternFactory<T, R> {
 		return new MemoizingPattern<>(wrapee);
 	}
 
-	protected FluentPattern<T, R> from(Pattern<T, R> pattern) {
-		return new FluentPatternImpl<>(this.fluent(pattern));
-	}
-
 	/** */
-	protected <V> Pattern<T, Tree> skip(Pattern<T, V> pattern) {
+	public <V> Pattern<T, Tree> skip(Pattern<T, V> pattern) {
 		return this.fluent(pattern).map(t-> EmptyTree.INSTANCE);
 	}
 
-	protected FluentPattern<T, Tree> constant(Iterable<T> match) {
+	public FluentPattern<T, Tree> constant(Iterable<T> match) {
 		return this.fluent(this.wrap(new ConstantPattern<>(match)));
 	}
 
-	protected FluentPattern<T, Tree> whiteList(Set<T> onlyAllowed) {
+	public FluentPattern<T, Tree> whiteList(Set<T> onlyAllowed) {
 		return this.fluent(this.wrap(new TokenWhiteListPattern<>(onlyAllowed)));
 	}
 
-	protected FluentPattern<T, Tree> blackList(Set<T> onlyAllowed) {
+	public FluentPattern<T, Tree> blackList(Set<T> onlyAllowed) {
 		return this.fluent(this.wrap(new TokenBlackListPattern<>(onlyAllowed)));
 	}
 
 	@SafeVarargs
-	final protected <V> FluentPattern<T, V> anyOf(Pattern<T, ? extends V> ... choices) {
+	final public <V> FluentPattern<T, V> anyOf(Pattern<T, ? extends V> ... choices) {
 		return this.fluent(this.wrap(new AnyOfPattern<>(choices)));
 	}
 
-	protected <V> PatternDeclaration<T, V> declare(final String description) {
+	public <V> PatternDeclaration<T, V> declare(final String description) {
 		return new PatternDeclarationImpl<>(description);
 	}
 
 	@SafeVarargs
-	final protected FluentPattern<T, Tree> sequence(Pattern<T, ?> ... elements) {
+	final public FluentPattern<T, Tree> sequence(Pattern<T, ?> ... elements) {
 		return this.fluent(this.wrap(new SequencePattern<>(elements)));
 	}
 
-	protected <V> FluentPattern<T, Tree> zeroOrMore(Pattern<T, V> element) {
+	public <V> FluentPattern<T, Tree> zeroOrMore(Pattern<T, V> element) {
 		return this.fluent(this.wrap(new ZeroOrMorePattern<>(element)));
 	}
 
-	protected <V> FluentPattern<T, Tree> oneOrMore(Pattern<T, V> element) {
+	public <V> FluentPattern<T, Tree> oneOrMore(Pattern<T, V> element) {
 		return this.fluent(this.wrap(new OneOrMorePattern<>(element)));
 	}
 
-	protected FluentPattern<T, Tree> optional(Pattern<T, ?> element) {
+	public FluentPattern<T, Tree> optional(Pattern<T, ?> element) {
 		return this.fluent(this.wrap(new OptionalPattern<>(element)));
 	}
 
-	protected FluentPattern<T, Tree> repeat(Pattern<T, ?> pattern, Long minOccurs, Long maxOccurs, boolean greedy) {
+	public FluentPattern<T, Tree> repeat(Pattern<T, ?> pattern, Integer minOccurs, Integer maxOccurs, boolean greedy) {
 		return this.fluent(this.wrap(new RepeatPattern<>(pattern, minOccurs, maxOccurs, greedy)));
 	}
 
-	protected FluentPattern<T, Tree> repeat(Pattern<T, ?> pattern, Long minOccurs, Long maxOccurs) {
+	public FluentPattern<T, Tree> repeat(Pattern<T, ?> pattern, Integer minOccurs, Integer maxOccurs) {
 		return repeat(pattern, minOccurs, maxOccurs, false);
 	}
 
-	protected FluentPattern<T, Tree> repeat(Pattern<T, ?> pattern, Long occurs, boolean greedy) {
+	public FluentPattern<T, Tree> repeat(Pattern<T, ?> pattern, Integer occurs, boolean greedy) {
 		return this.repeat(pattern, occurs, occurs, greedy);
 	}
 
-	protected FluentPattern<T, Tree> repeat(Pattern<T, ?> pattern, Long occurs) {
+	public FluentPattern<T, Tree> repeat(Pattern<T, ?> pattern, Integer occurs) {
 		return repeat(pattern, occurs, false);
 	}
 
-	protected FluentPattern<T, Tree> anyToken() {
+	public FluentPattern<T, Tree> anyToken() {
 		return this.fluent(this.wrap(new AnyTokenPattern<>()));
 	}
 
+
+	//////////////////
+
+	public <V, S> Function<V, S> fix(final S value) {
+		return v->value;
+	}
+
+	public <V> Function<V, Tree> empty() {
+		return v->EmptyTree.INSTANCE;
+	}
+
+//	public <V> Function<Tree, List<V>> values() {
+//
+//	}
 }

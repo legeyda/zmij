@@ -35,10 +35,10 @@ public class Trees {
 	public static Tree from(final Tag tag, final Object anything) {
 		if(anything instanceof Tree) {
 			return (Tree)anything;
-		} else if(anything instanceof Iterable) {
+		} /*else if(anything instanceof Iterable) {
 			return from(tag, (Iterable)anything);
-		} else {
-			new ValuedLeaf(Tag.RESULT, anything);
+		} */else {
+			return new ValuedLeaf(tag, anything);
 		}
 	}
 

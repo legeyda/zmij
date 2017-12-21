@@ -4,7 +4,7 @@ import com.legeyda.zmij.pattern.CharPatternCase;
 import com.legeyda.zmij.result.Failure;
 import com.legeyda.zmij.result.Value;
 import com.legeyda.zmij.tree.Tag;
-import com.legeyda.zmij.tree.impl.Branch;
+import com.legeyda.zmij.tree.impl.ValuelessBranch;
 import com.legeyda.zmij.tree.impl.ValuedLeaf;
 import com.legeyda.zmij.util.CharSequenceList;
 import org.junit.Test;
@@ -20,17 +20,17 @@ public class OneOrMorePatternTest {
 		new CharPatternCase<>(
 				new OneOrMorePattern<>(new ConstantPattern<>(new CharSequenceList("a"))),
 				"aaabc",
-				new Value<>(new Branch(Tag.REPEAT, Arrays.asList(
-						new ValuedLeaf(Tag.RESULT, new ValuedLeaf(Tag.TOKEN, new CharSequenceList("a"))),
-						new ValuedLeaf(Tag.RESULT, new ValuedLeaf(Tag.TOKEN, new CharSequenceList("a"))),
-						new ValuedLeaf(Tag.RESULT, new ValuedLeaf(Tag.TOKEN, new CharSequenceList("a"))))))
+				new Value<>(new ValuelessBranch(Tag.REPEAT, Arrays.asList(
+						new ValuelessBranch(Tag.CONSTANT, Collections.singletonList(new ValuedLeaf(Tag.TOKEN, 'a'))),
+						new ValuelessBranch(Tag.CONSTANT, Collections.singletonList(new ValuedLeaf(Tag.TOKEN, 'a'))),
+						new ValuelessBranch(Tag.CONSTANT, Collections.singletonList(new ValuedLeaf(Tag.TOKEN, 'a'))))))
 		).run();
 
 		new CharPatternCase<>(
 				new OneOrMorePattern<>(new ConstantPattern<>(new CharSequenceList("a"))),
 				"ab",
-				new Value<>(new Branch(Tag.REPEAT, Collections.singletonList(
-						new ValuedLeaf(Tag.RESULT, new ValuedLeaf(Tag.TOKEN, new CharSequenceList("a"))))))
+				new Value<>(new ValuelessBranch(Tag.REPEAT, Collections.singletonList(
+						new ValuelessBranch(Tag.CONSTANT, Collections.singletonList(new ValuedLeaf(Tag.TOKEN, 'a'))))))
 		).run();
 
 		new CharPatternCase<>(

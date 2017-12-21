@@ -2,6 +2,7 @@ package com.legeyda.zmij.result;
 
 import java.util.Objects;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class Value<T> implements Result<T> {
 
@@ -10,6 +11,8 @@ public class Value<T> implements Result<T> {
 	public Value(T value) {
 		this.value = Objects.requireNonNull(value);
 	}
+
+
 
 	@Override
 	public boolean isPresent() {
@@ -26,16 +29,20 @@ public class Value<T> implements Result<T> {
 		throw new IllegalStateException("result isPresent, message is empty");
 	}
 
+
+
+
 	@Override
-	public Result<T> ifValue(Consumer<T> valueHandler) {
-		valueHandler.accept(this.value());
-		return this;
+	public <V> Result<V> map(Function<? super T, ? extends V> mapping) {
+		return new Value<>(mapping.apply(this.value()));
 	}
 
 	@Override
-	public Result<T> ifMessage(Consumer<String> errorHandler) {
-		return this;
+	public T orElse(T defaultValue) {
+		return null;
 	}
+
+
 
 	@Override
 	public boolean equals(Object o) {

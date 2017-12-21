@@ -18,8 +18,8 @@ public class ValuedLeaf extends AbstractLeaf {
 
 	@Override
 	public String toString() {
-		return "ValuedLeaf{" +
-				"tag=" + this.tag() +
-				", optValue=" + value + '}';
+		return "Tree{" +
+				"tag: " + this.tag() +
+				", value: " + value + '}';
 	}
 }

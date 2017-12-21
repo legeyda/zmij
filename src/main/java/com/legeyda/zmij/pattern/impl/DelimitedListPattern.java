@@ -5,11 +5,10 @@ import com.legeyda.zmij.passage.Passage;
 import com.legeyda.zmij.passage.impl.SuppliedPassage;
 import com.legeyda.zmij.pattern.Pattern;
 import com.legeyda.zmij.result.Result;
-import com.legeyda.zmij.result.Value;
 import com.legeyda.zmij.tree.Tag;
 import com.legeyda.zmij.tree.Tree;
 import com.legeyda.zmij.tree.Trees;
-import com.legeyda.zmij.tree.impl.Branch;
+import com.legeyda.zmij.tree.impl.AnythingAsTree;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -54,14 +53,14 @@ public class DelimitedListPattern<T, R> extends BaseDescriptionPattern<T, Tree> 
 				if(!next.isPresent()) {
 					return createFailure(input, String.format("expected %s after separator", element.description()));
 				}
-				result.add(Trees.from(Tag.DELIMITED_ITEM, next.value()));
+				result.add(new AnythingAsTree(Tag.DELIMITED_ITEM, next.value()));
 				if(maxOccurs<0 || result.size()>maxOccurs) {
 					return createFailure(input, String.format("expected at most %d elements", element.description()));
 				}
 			}
 
 			// todo fix
-			//return new Value<>(new Branch(Tag.DELIMITED_LIST, result));
+			//return new Value<>(new ValuelessBranch(Tag.DELIMITED_LIST, result));
 		});
 	}
 }

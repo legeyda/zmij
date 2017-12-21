@@ -1,6 +1,6 @@
 package com.legeyda.zmij.result;
 
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 
 /** getOpt().ifValue().ifMessage() */
@@ -9,6 +9,6 @@ public interface Result<T> {
 	T value();
 	String message();
 
-	Result<T> ifValue(Consumer<T> valueHandler);
-	Result<T> ifMessage(Consumer<String> errorHandler);
+	<V> Result<V> map(Function<? super T, ? extends V> mapping);
+	T orElse(final T defaultValue);
 }

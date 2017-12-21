@@ -26,7 +26,6 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 		final Pattern<Character, Tree> comma  = sequence(whiteSpace, constant(','), whiteSpace)
 				.description("comma")
 				.forget();
-		//      .map(empty());
 
 
 
@@ -36,11 +35,12 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 
 		final Pattern<Character,  Character> unicode = sequence(
 				constant("\\u").forget(),
-				repeat(whiteList("0123456789ABCDEF"), 4L, 4L, false)
+				repeat(whiteList("0123456789ABCDEF"), 4, false)// .map(asString());
 		)
 				.listValues()
 				.map((list) -> (char)Long.parseLong("" + new ListCharSequence((List<Character>)(List)list), 16))
 				.description("unicode code");
+		//      .map(
 
 		final Pattern<Character,  Character> character = anyOf(
 				blackList('\\', '"').map(t->(Character)t.value().get()),
@@ -75,8 +75,8 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 		final Pattern<Character, Long> optSign = optional(whiteList('+', '-'))
 				.optValue()
 				.map(opt->opt.map(s->'-'==(Character)s ? -1L : 1L).orElse(1L));
-		//      .map(value().orElse('+'))
-		//      .map(ch->
+		//      .map(value().orElse('+').andThen(mapping('+', 1L, '-', -1L).orThrow()))
+		//      .map(value().map(mapping('+', 1L, '-', -1L)).orElse(1L)))
 
 		final Pattern<Character, Long> unsignedInteger = sequence(digit, zeroOrMore(nonZeroDigit))
 				.listValues()
@@ -85,6 +85,9 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 		final Pattern<Character, Long> signedInteger = sequence(optSign, unsignedInteger)
 				.map(seq ->
 						(Long)seq.children().get(0).value().get() * (Long)seq.children().get(1).value().get());
+		//              .map(values()
+		//                         .<List<Long>>cast()
+		//                         .andThen(list->list.get(0) * list.get(1)));
 
 		final Pattern<Character, Double> unsignedFloat = sequence(zeroOrMore(nonZeroDigit), constant('.'), oneOrMore(digit))
 				.listValues()
@@ -116,13 +119,15 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 						return (Number)list.get(0);
 					}
 				});
-
+		//      .map(values())
+		// whiteList('e', 'E').forget();
 
 
 		// ======== array ========
 		final Pattern<Character, List<Object>> elements = sequence(value, zeroOrMore(sequence(comma, value)))
 				.description("array elements")
 				.listValues();
+		//      .map(listValues());
 
 		final Pattern<Character, List<?>> array = sequence(
 				whiteSpace,
@@ -135,6 +140,7 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 		)
 				.description("array")
 				.map(seq -> (List<?>)seq.children().get(3).value().orElse(new LinkedList<>()));
+		//      .map().value().map().orElse(new LinkedList<>()));
 
 
 		// ======== object ========

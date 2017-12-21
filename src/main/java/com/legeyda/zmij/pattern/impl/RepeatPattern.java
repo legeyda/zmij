@@ -9,8 +9,8 @@ import com.legeyda.zmij.result.Value;
 import com.legeyda.zmij.tree.Tag;
 import com.legeyda.zmij.tree.Tree;
 import com.legeyda.zmij.tree.Trees;
-import com.legeyda.zmij.tree.impl.Branch;
-import com.legeyda.zmij.tree.impl.ValuedLeaf;
+import com.legeyda.zmij.tree.impl.AnythingAsTree;
+import com.legeyda.zmij.tree.impl.ValuelessBranch;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -19,11 +19,11 @@ import java.util.List;
 public class RepeatPattern<T> extends BasePattern<T, Tree> {
 
 	private final Pattern<T, ?> pattern;
-	private final Long minOccurs;
-	private final Long maxOccurs;
+	private final Integer minOccurs;
+	private final Integer maxOccurs;
 	private final boolean greedy;
 
-	public RepeatPattern(Pattern<T, ?> pattern, Long minOccurs, Long maxOccurs, boolean greedy) {
+	public RepeatPattern(Pattern<T, ?> pattern, Integer minOccurs, Integer maxOccurs, boolean greedy) {
 		this.pattern = pattern;
 		this.minOccurs = minOccurs;
 		this.maxOccurs = maxOccurs;
@@ -42,7 +42,7 @@ public class RepeatPattern<T> extends BasePattern<T, Tree> {
 			final List<Tree> found = new LinkedList<>();
 			Result<?> result;
 			while((result = passage.get()).isPresent()) {
-				found.add(Trees.from(Tag.REPEAT_ITEM, result.value()));
+				found.add(new AnythingAsTree(Tag.REPEAT_ITEM, result.value()));
 
 				if(!this.greedy && this.maxOccurs == found.size()) {
 					break;
@@ -52,7 +52,7 @@ public class RepeatPattern<T> extends BasePattern<T, Tree> {
 				}
 			}
 			if(found.size()>=this.minOccurs && found.size()<=this.maxOccurs) {
-				return new Value<>(new Branch(Tag.REPEAT, found));
+				return new Value<>(new ValuelessBranch(Tag.REPEAT, found));
 			} else {
 				return this.createFailure(input, String.format("got %d repetitions", found.size()));
 			}

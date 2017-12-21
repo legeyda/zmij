@@ -9,8 +9,8 @@ import com.legeyda.zmij.result.Value;
 import com.legeyda.zmij.tree.Tag;
 import com.legeyda.zmij.tree.Tree;
 import com.legeyda.zmij.tree.Trees;
-import com.legeyda.zmij.tree.impl.Branch;
-import com.legeyda.zmij.tree.impl.ValuedLeaf;
+import com.legeyda.zmij.tree.impl.AnythingAsTree;
+import com.legeyda.zmij.tree.impl.ValuelessBranch;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -35,9 +35,9 @@ public class ZeroOrMorePattern<T> extends BasePattern<T, Tree> {
 			final List<Tree> children = new LinkedList<>();
 			Result<?> result;
 			while((result = passage.get()).isPresent()) {
-				children.add(Trees.from(Tag.RESULT, result.value()));
+				children.add(new AnythingAsTree(Tag.REPEAT_ITEM, result.value()));
 			}
-			return new Value<>(new Branch(Tag.REPEAT, children));
+			return new Value<>(new ValuelessBranch(Tag.REPEAT, children));
 		});
 	}
 

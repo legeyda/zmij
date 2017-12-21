@@ -11,7 +11,8 @@ import com.legeyda.zmij.result.Result;
 import com.legeyda.zmij.result.Value;
 import com.legeyda.zmij.tree.Tree;
 import com.legeyda.zmij.tree.Trees;
-import com.legeyda.zmij.tree.impl.Branch;
+import com.legeyda.zmij.tree.impl.AnythingAsTree;
+import com.legeyda.zmij.tree.impl.ValuelessBranch;
 import com.legeyda.zmij.util.PairIterable;
 import com.legeyda.zmij.util.Pair;
 
@@ -38,12 +39,12 @@ public class SequencePattern<T> extends BasePattern<T, Tree> {
 			for(final Pair<Pattern<T, ?>, Passage<?>> pair: new PairIterable<>(elements, passages)) {
 				final Result<?> child = pair.getB().get();
 				if(child.isPresent()) {
-					result.add(Trees.from(Tag.SEQUENCE_ITEM, child));
+					result.add(new AnythingAsTree(Tag.SEQUENCE_ITEM, child));
 				} else {
 					return this.createFailure(input, String.format("expected %s", pair.getA().description()));
 				}
 			}
-			return new Value<>(new Branch(Tag.SEQUENCE, result));
+			return new Value<>(new ValuelessBranch(Tag.SEQUENCE, result));
 		});
 	}
 

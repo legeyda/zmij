@@ -8,7 +8,8 @@ import com.legeyda.zmij.result.Result;
 import com.legeyda.zmij.result.Value;
 import com.legeyda.zmij.tree.Tag;
 import com.legeyda.zmij.tree.Tree;
-import com.legeyda.zmij.tree.impl.Branch;
+import com.legeyda.zmij.tree.impl.AnythingAsTree;
+import com.legeyda.zmij.tree.impl.ValuelessBranch;
 import com.legeyda.zmij.tree.impl.ValuedLeaf;
 import com.legeyda.zmij.util.Util;
 
@@ -35,10 +36,10 @@ public class OneOrMorePattern<T> extends BasePattern<T, Tree> {
 			final List<Tree> children = new LinkedList<>();
 			Result<?> result;
 			while((result = passage.get()).isPresent()) {
-				children.add(new ValuedLeaf(Tag.RESULT, result.value()));
+				children.add(new AnythingAsTree(Tag.REPEAT_ITEM, result.value()));
 			}
 			if(0<children.size()) {
-				return new Value<>(new Branch(Tag.REPEAT, children));
+				return new Value<>(new ValuelessBranch(Tag.REPEAT, children));
 			} else {
 				return this.createFailure(input, String.format("at least single <%s> expected", this.pattern.description()));
 			}

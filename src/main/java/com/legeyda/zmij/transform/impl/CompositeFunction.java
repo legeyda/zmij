@@ -1,8 +1,9 @@
-package com.legeyda.zmij.util;
+package com.legeyda.zmij.transform.impl;
 
 import java.util.function.Function;
 
-public class CompositeFunction<X, Y, Z> implements Function<X, Z> {
+public class CompositeFunction<X, Y, Z> extends BaseFluentFunction<X, Z> {
+
 	private final Function<? super X, ? extends Y> f;
 	private final Function<? super Y, ? extends Z> g;
 
@@ -15,4 +16,5 @@ public class CompositeFunction<X, Y, Z> implements Function<X, Z> {
 	public Z apply(X x) {
 		return this.g.apply(this.f.apply(x));
 	}
+
 }

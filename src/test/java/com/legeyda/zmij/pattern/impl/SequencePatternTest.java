@@ -6,12 +6,13 @@ import com.legeyda.zmij.result.Failure;
 import com.legeyda.zmij.result.Value;
 import com.legeyda.zmij.tree.Tag;
 import com.legeyda.zmij.tree.Tree;
-import com.legeyda.zmij.tree.impl.Branch;
+import com.legeyda.zmij.tree.impl.ValuelessBranch;
 import com.legeyda.zmij.tree.impl.ValuedLeaf;
 import com.legeyda.zmij.util.CharSequenceList;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class SequencePatternTest {
 
@@ -25,10 +26,10 @@ public class SequencePatternTest {
 		new CharPatternCase<>(
 				new SequencePattern<>(a, b, c),
 				"abc",
-				new Value<>(new Branch(Tag.SEQUENCE, Arrays.asList(
-						new ValuedLeaf(Tag.TOKEN, new CharSequenceList("a")),
-						new ValuedLeaf(Tag.TOKEN, new CharSequenceList("b")),
-						new ValuedLeaf(Tag.TOKEN, new CharSequenceList("c")))))
+				new Value<>(new ValuelessBranch(Tag.SEQUENCE, Arrays.asList(
+						new ValuelessBranch(Tag.CONSTANT, Collections.singletonList(new ValuedLeaf(Tag.TOKEN, 'a'))),
+						new ValuelessBranch(Tag.CONSTANT, Collections.singletonList(new ValuedLeaf(Tag.TOKEN, 'b'))),
+						new ValuelessBranch(Tag.CONSTANT, Collections.singletonList(new ValuedLeaf(Tag.TOKEN, 'c'))))))
 		).run();
 
 		new CharPatternCase<>(

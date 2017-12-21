@@ -5,8 +5,11 @@ import com.legeyda.zmij.result.Failure;
 import com.legeyda.zmij.result.Value;
 import com.legeyda.zmij.tree.Tag;
 import com.legeyda.zmij.tree.impl.ValuedLeaf;
+import com.legeyda.zmij.tree.impl.ValuelessBranch;
 import com.legeyda.zmij.util.CharSequenceList;
 import org.junit.Test;
+
+import java.util.Arrays;
 
 
 public class ConstantPatternTest {
@@ -17,7 +20,10 @@ public class ConstantPatternTest {
 		new PatternCase<>(
 				new ConstantPattern<>(new CharSequenceList("abc")),
 				new CharSequenceList("abcde"),
-				new Value<>(new ValuedLeaf(Tag.TOKEN, new CharSequenceList("abc")))
+				new Value<>(new ValuelessBranch(Tag.CONSTANT, Arrays.asList(
+						new ValuedLeaf(Tag.TOKEN, 'a'),
+						new ValuedLeaf(Tag.TOKEN, 'b'),
+						new ValuedLeaf(Tag.TOKEN, 'c'))))
 		).run();
 
 		new PatternCase<>(

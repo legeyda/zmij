@@ -6,16 +6,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class Branch extends AbstractTree {
+public class ValuelessBranch extends AbstractTree {
 
 	private final List<Tree> children;
 
-	public Branch(Enum tag, List<Tree> children) {
+	public ValuelessBranch(Enum tag, List<Tree> children) {
 		super(tag);
 		this.children = children;
 	}
 
-	public Branch(Enum tag) {
+	public ValuelessBranch(Enum tag) {
 		this(tag, Collections.emptyList());
 	}
 
@@ -31,6 +31,6 @@ public class Branch extends AbstractTree {
 
 	@Override
 	public String toString() {
-		return "Branch{" + "tag=" + this.tag() + ", # of children: " + this.children().size() + '}';
+		return "Tree{" + "tag: " + this.tag() + ", # of children: " + this.children().size() + '}';
 	}
 }

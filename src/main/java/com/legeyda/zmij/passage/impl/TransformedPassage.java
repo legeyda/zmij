@@ -10,21 +10,16 @@ import java.util.function.Function;
 public class TransformedPassage<T, R> implements Passage<R> {
 
 	private final Passage<T> passage;
-	private final Function<? super T, ? extends R> function;
+	private final Function<Result<T>, Result<R>> function;
 
-	public TransformedPassage(Passage<T> passage, Function<? super T, ? extends R> function) {
+	public TransformedPassage(Passage<T> passage, Function<Result<T>, Result<R>> function) {
 		this.passage = passage;
 		this.function = function;
 	}
 
 	@Override
 	public Result<R> get() {
-		final Result<? extends T> result = this.passage.get();
-		if(result.isPresent()) {
-			return new Value<>(this.function.apply(result.value()));
-		} else {
-			return new Failure<>(result.message());
-		}
+		return this.function.apply(this.passage.get());
 	}
 
 }

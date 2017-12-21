@@ -1,33 +1,47 @@
 package com.legeyda.zmij.pattern.impl.fluent;
 
+import com.legeyda.zmij.input.ParsingContext;
+import com.legeyda.zmij.passage.Passage;
 import com.legeyda.zmij.pattern.FluentPattern;
 import com.legeyda.zmij.pattern.Pattern;
-import com.legeyda.zmij.pattern.impl.AnyOfPattern;
-import com.legeyda.zmij.pattern.impl.ButPattern;
-import com.legeyda.zmij.pattern.impl.SequencePattern;
-import com.legeyda.zmij.transform.CollectValues;
-import com.legeyda.zmij.tree.Tag;
-import com.legeyda.zmij.tree.Tree;
-import com.legeyda.zmij.tree.Trees;
-import com.legeyda.zmij.tree.impl.EmptyTree;
+import com.legeyda.zmij.result.Result;
 
-import java.util.*;
 import java.util.function.Function;
 
 public class FluentPatternImpl<T, R> extends FluentPatternBase<T, R> {
 
+	private final Pattern<T, R> pattern;
 
 	public FluentPatternImpl(final String description, Pattern<T, R> pattern) {
-		super(description, pattern);
+		super(description);
+		this.pattern = pattern;
 	}
 
 	public FluentPatternImpl(final Pattern<T, R> pattern) {
-		super(pattern);
+		super();
+		this.pattern = pattern;
 	}
 
 
 
-	// fluent pattern
+
+	// delegate to pattern
+
+	@Override
+	String defaultDescription() {
+		return this.pattern.description();
+	}
+
+	@Override
+	public Passage<R> apply(final ParsingContext input) {
+		return this.pattern.apply(input);
+	}
+
+
+
+
+
+	// delegate to fluent pattern
 
 	@Override
 	public FluentPattern<T, R> description(final String description) {
@@ -35,55 +49,8 @@ public class FluentPatternImpl<T, R> extends FluentPatternBase<T, R> {
 	}
 
 	@Override
-	public FluentPattern<T, R> butNot(Pattern<T, ?> shouldNotMatch) {
-		return new FluentPatternImpl<>(new ButPattern<>(this.pattern, shouldNotMatch));
-	}
-
-	@Override
-	public FluentPattern<T, R> butNot(Pattern<T, ?>[] allShouldNotMatch) {
-		return new FluentPatternImpl<>(new ButPattern<>(this.pattern, new AnyOfPattern<>(allShouldNotMatch)));
-	}
-
-	@Override
-	public FluentPattern<T, Tree> andThen(Pattern<T, ?> ... others) {
-		final Collection<Pattern<T, ?>> patterns = new ArrayList<>(1+others.length);
-		patterns.add(this.pattern);
-		patterns.addAll(Arrays.asList(others));
-		return new FluentPatternImpl<>(new SequencePattern<>(this.pattern));
-	}
-
-
-
-
-
-	@Override
-	public <V> FluentPattern<T, V> map(final Function<? super R, ? extends V> function) {
+	public <V> FluentPattern<T, V> andThen(Function<Result<R>, Result<V>> function) {
 		return new TransformedFluentPattern<>(this.description, this.pattern, function);
-	}
-
-	@Override
-	public <V> FluentPattern<T, V> value() {
-		return this.map(tree->(V)Trees.from(Tag.RESULT, tree).value().get());
-	}
-
-	@Override
-	public <V> FluentPattern<T, Optional<V>> optValue() {
-		return this.map(tree->(Optional<V>)Trees.from(Tag.RESULT, tree).value());
-	}
-
-	@Override
-	public FluentPattern<T, List<Object>> listValues() {
-		return this.map(something -> CollectValues.INSTANCE.apply(Trees.from(Tag.RESULT, something)));
-	}
-
-	@Override
-	public <RR> FluentPattern<T, RR> save(final RR value) {
-		return new TransformedFluentPattern<>(this.description, this.pattern, whatever->value);
-	}
-
-	@Override
-	public FluentPattern<T, Tree> forget() {
-		return new TransformedFluentPattern<>(this.description, this.pattern, whatever-> EmptyTree.INSTANCE);
 	}
 
 }

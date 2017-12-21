@@ -5,11 +5,12 @@ import com.legeyda.zmij.tree.Tree;
 import java.util.List;
 import java.util.Optional;
 
-public abstract class TreeDecorator implements Tree {
+public abstract class TreeDecorator extends AbstractTree {
 
 	private final Tree wrapee;
 
 	public TreeDecorator(Tree wrapee) {
+		super(wrapee.tag());
 		this.wrapee = wrapee;
 	}
 

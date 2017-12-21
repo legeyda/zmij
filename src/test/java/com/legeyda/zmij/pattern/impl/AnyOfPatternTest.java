@@ -6,9 +6,14 @@ import com.legeyda.zmij.result.Failure;
 import com.legeyda.zmij.result.Value;
 import com.legeyda.zmij.tree.Tag;
 import com.legeyda.zmij.tree.Tree;
+import com.legeyda.zmij.tree.impl.AnythingAsTree;
 import com.legeyda.zmij.tree.impl.ValuedLeaf;
+import com.legeyda.zmij.tree.impl.ValuelessBranch;
 import com.legeyda.zmij.util.CharSequenceList;
 import org.junit.Test;
+
+import java.util.Collections;
+
 public class AnyOfPatternTest {
 
 
@@ -20,13 +25,13 @@ public class AnyOfPatternTest {
 		new CharPatternCase<>(
 				new AnyOfPattern<>(a, b),
 				"abc",
-				new Value<>(new ValuedLeaf(Tag.TOKEN, new CharSequenceList("a")))
+				new Value<>(new ValuelessBranch(Tag.CONSTANT, Collections.singletonList(new ValuedLeaf(Tag.TOKEN, 'a'))))
 		).run();
 
 		new CharPatternCase<>(
 				new AnyOfPattern<>(a, b),
 				"bcd",
-				new Value<>(new ValuedLeaf(Tag.TOKEN, new CharSequenceList("b")))
+				new Value<>(new ValuelessBranch(Tag.CONSTANT, Collections.singletonList(new ValuedLeaf(Tag.TOKEN, 'b'))))
 		).run();
 
 		new CharPatternCase<>(

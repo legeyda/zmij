@@ -1,6 +1,7 @@
 package com.legeyda.zmij.result;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class Failure<T> implements Result<T> {
 
@@ -9,6 +10,8 @@ public class Failure<T> implements Result<T> {
 	public Failure(String message) {
 		this.message = message;
 	}
+
+
 
 	@Override
 	public boolean isPresent() {
@@ -25,16 +28,19 @@ public class Failure<T> implements Result<T> {
 		return this.message;
 	}
 
+
+
 	@Override
-	public Result<T> ifValue(Consumer<T> valueHandler) {
-		return this;
+	public <V> Result<V> map(Function<? super T, ? extends V> mapping) {
+		return new Failure<>(this.message());
 	}
 
 	@Override
-	public Result<T> ifMessage(Consumer<String> errorHandler) {
-		errorHandler.accept(this.message());
-		return this;
+	public T orElse(T defaultValue) {
+		return defaultValue;
 	}
+
+
 
 	@Override
 	public boolean equals(Object o) {

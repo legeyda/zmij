@@ -10,6 +10,7 @@ import com.legeyda.zmij.result.Value;
 import com.legeyda.zmij.tree.Tag;
 import com.legeyda.zmij.tree.Tree;
 import com.legeyda.zmij.tree.Trees;
+import com.legeyda.zmij.tree.impl.AnythingAsTree;
 import com.legeyda.zmij.tree.impl.ValuelessLeaf;
 import com.legeyda.zmij.util.Try;
 import com.legeyda.zmij.util.Util;
@@ -33,7 +34,7 @@ public class OptionalPattern<T, R> extends BasePattern<T, Tree> {
 		return new SuppliedPassage<>(() -> new Try<Savepoint, Result<Tree>>(save -> {
 			final Result<R> result = passage.get();
 			if(result.isPresent()) {
-				return new Value<>(Trees.from(Tag.OPTIONAL_PRESENT, result));
+				return new Value<>(new AnythingAsTree(Tag.OPTIONAL_PRESENT, result));
 			} else {
 				return new Value<>(new ValuelessLeaf(Tag.OPTIONAL_ABSENT));
 			}
