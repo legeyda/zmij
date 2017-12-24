@@ -8,22 +8,25 @@ import com.legeyda.zmij.input.impl.input.restoreable.GivenRestoreableInput;
 import com.legeyda.zmij.input.impl.input.util.ItemList;
 import com.legeyda.zmij.result.Result;
 import com.legeyda.zmij.util.CharSequenceList;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.IOException;
 
 public class JsonExampleTest {
 
+	protected ParsingContext<Character> getContext(final String data) {
+		return new ParsingContextImpl<>(new GivenRestoreableInput<>(new ItemList<>(new CharSequenceList(data))));
+	}
+
 	protected void doTest(final String file) throws IOException {
 		final String json = Resources.toString(
 				Resources.getResource(file),
 				Charsets.UTF_8);
 
-		final ParsingContext<Character> ctx =
-				new ParsingContextImpl<>(new GivenRestoreableInput<>(new ItemList<>(new CharSequenceList(json))));
+		final Result<Object> result = new JsonPatternFactory().get().apply(getContext(json)).get();
 
-
-		final Result<Object> result = new JsonPatternFactory().get().apply(ctx).get();
+		Assert.assertTrue(result.isPresent());
 
 	}
 
@@ -41,8 +44,14 @@ public class JsonExampleTest {
 		doTest("com/legeyda/zmij/json/example3.json");
 	}
 
+	@Test
+	public void test4() throws IOException {
+		doTest("com/legeyda/zmij/json/example4.json");
+	}
 
-
-
+	@Test
+	public void test5() throws IOException {
+		doTest("com/legeyda/zmij/json/example5.json");
+	}
 
 }

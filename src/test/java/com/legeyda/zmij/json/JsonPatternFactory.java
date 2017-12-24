@@ -90,7 +90,7 @@ public class JsonPatternFactory extends CharGrammarSugar {
 		final Pattern<Character, Integer> optSign = optional(whiteList('+', '-'))
 				.map(value().flatCast(Character.class).map(s->'-'==s ? -1 : 1).orElse((1)));
 ;
-		final Pattern<Character, BigDecimal> unsignedInteger = sequence(digit, zeroOrMore(nonZeroDigit))
+		final Pattern<Character, BigDecimal> unsignedInteger = sequence(nonZeroDigit, zeroOrMore(digit))
 				.asString()
 				.map(BigDecimal::new);
 
@@ -98,7 +98,7 @@ public class JsonPatternFactory extends CharGrammarSugar {
 				.values()
 				.map(both -> ((BigDecimal)both.get(1)).multiply(BigDecimal.valueOf((Integer)both.get(0))));
 
-		final Pattern<Character, BigDecimal> unsignedFloat = sequence(zeroOrMore(nonZeroDigit), constant('.'), oneOrMore(digit))
+		final Pattern<Character, BigDecimal> unsignedFloat = sequence(nonZeroDigit, zeroOrMore(digit), constant('.'), oneOrMore(digit))
 				.asString()
 				.map(BigDecimal::new);
 
@@ -178,7 +178,7 @@ public class JsonPatternFactory extends CharGrammarSugar {
 
 		Pattern<Character, Object> nil = sequence(whiteSpace, constant("null"), whiteSpace)
 				.description("null")
-				.save(null);
+				.save(Null.INSTANCE);
 
 
 		Pattern<Character, Object> truth = sequence(whiteSpace, constant("true"), whiteSpace)

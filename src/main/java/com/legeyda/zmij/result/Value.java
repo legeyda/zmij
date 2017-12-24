@@ -1,9 +1,5 @@
 package com.legeyda.zmij.result;
 
-import com.legeyda.zmij.transform.OptFunction;
-
-import java.util.Objects;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class Value<T> implements Result<T> {
@@ -11,7 +7,7 @@ public class Value<T> implements Result<T> {
 	private final T value;
 
 	public Value(T value) {
-		this.value = Objects.requireNonNull(value);
+		this.value = value;
 	}
 
 
