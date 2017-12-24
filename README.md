@@ -1,15 +1,12 @@
-package com.legeyda.zmij.json;
+# Parser generator for java 8
 
-import com.legeyda.zmij.sugar.CharGrammarSugar;
-import com.legeyda.zmij.pattern.Pattern;
-import com.legeyda.zmij.pattern.PatternDeclaration;
-import com.legeyda.zmij.tree.Tree;
+A java library for declaratively defining language grammar and parse according to this grammar.
 
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
+Below is example code for parsing json.
 
+Step one. Define grammar.
+
+```java
 public class JsonPatternFactory extends CharGrammarSugar implements Supplier<Pattern<Character, Object>> {
 
 	@Override
@@ -198,3 +195,9 @@ public class JsonPatternFactory extends CharGrammarSugar implements Supplier<Pat
 
 
 }
+```
+Step two. Parse string.
+
+```java
+final Object jsValue = new CharParser<>(new JsonPatternFactory()).parseResourceAt(file)
+```
