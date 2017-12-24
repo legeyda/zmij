@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.*;
 
-public class JsonPatternFactory extends CharGrammarSugar<Object> {
+public class JsonPatternFactory extends CharGrammarSugar {
 
 
 	protected Map<String, Object> createMap(final Iterable<Map.Entry<String, Object>> items) {
@@ -110,9 +110,6 @@ public class JsonPatternFactory extends CharGrammarSugar<Object> {
 				.map(both -> ((BigDecimal)both.get(1)).multiply(BigDecimal.valueOf((Integer)both.get(0))));
 
 
-
-		//final Pattern<Character, Double> floating = sequence(signedInteger, optional());
-
 		final Pattern<Character, Number> number = sequence(
 				whiteSpace,
 				anyOf(signedFloat, signedInteger),
@@ -136,7 +133,7 @@ public class JsonPatternFactory extends CharGrammarSugar<Object> {
 
 
 		// ======== array ========
-		final Pattern<Character, List<Object>> elements = sequence(value, zeroOrMore(sequence(comma, value)))
+		final Pattern<Character, List<Object>> elements = delimitedList(value, comma)
 				.description("array elements")
 				.values();
 
@@ -159,7 +156,7 @@ public class JsonPatternFactory extends CharGrammarSugar<Object> {
 						.map(list->new AbstractMap.SimpleEntry<>(list.get(0).toString(), list.get(1)));
 
 
-		final Pattern<Character, Map<String, Object>> members = sequence(member, zeroOrMore(sequence(comma, member)))
+		final Pattern<Character, Map<String, Object>> members = delimitedList(member, comma)
 				.values()
 				.<List<Map.Entry<String, Object>>>cast()
 				.map(this::createMap);

@@ -44,7 +44,7 @@ public class DelimitedListPattern<T> extends BaseDescriptionPattern<T, Tree> {
 	protected Passage<Tree> createPassage(ParsingContext<T> input) {
 		final Passage<?> elementPassage   = this.element.apply(input);
 		final Passage<?> delimiterPassage = this.delimiter.apply(input);
-		return new SuppliedPassage<Tree>(() -> {
+		return new SuppliedPassage<>(() -> {
 			final List<Tree> result = new LinkedList<>();
 
 			final Result<?> first = elementPassage.get();

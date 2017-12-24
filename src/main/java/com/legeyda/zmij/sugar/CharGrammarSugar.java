@@ -10,7 +10,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.function.Function;
 
-public abstract class CharGrammarSugar<R> extends GrammarSugar<Character, R> {
+public abstract class CharGrammarSugar extends GrammarSugar<Character> {
 
 	public FluentPattern<Character, Tree> constant(CharSequence match) {
 		return this.constant(new CharSequenceList(match));
@@ -40,9 +40,5 @@ public abstract class CharGrammarSugar<R> extends GrammarSugar<Character, R> {
 	public Function<? extends Iterable<Character>, String> asString() {
 		return iterable -> new ListCharSequence(Lists.newArrayList(iterable)).toString();
 	}
-
-	/////////////
-
-
 
 }

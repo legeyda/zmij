@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-public abstract class GrammarSugar<T, R> {
+public abstract class GrammarSugar<T> {
 
 	public <V> FluentPattern<T, V> fluent(final Pattern<T, V> wrapee) {
 		return new FluentPatternImpl<>(new MemoizingPattern<>(wrapee));
@@ -30,6 +30,13 @@ public abstract class GrammarSugar<T, R> {
 
 	// pattern construction shortcuts
 
+	public <V> PatternDeclaration<T, V> declare(final String description) {
+		return new PatternDeclarationImpl<>(description);
+	}
+	public FluentPattern<T, Tree> anyToken() {
+		return this.fluent(this.wrap(new AnyTokenPattern<>()));
+	}
+
 	public FluentPattern<T, Tree> constant(Iterable<T> match) {
 		return this.fluent(this.wrap(new ConstantPattern<>(match)));
 	}
@@ -42,13 +49,13 @@ public abstract class GrammarSugar<T, R> {
 		return this.fluent(this.wrap(new TokenBlackListPattern<>(onlyAllowed)));
 	}
 
+	public FluentPattern<T, Tree> optional(Pattern<T, ?> element) {
+		return this.fluent(this.wrap(new OptionalPattern<>(element)));
+	}
+
 	@SafeVarargs
 	final public <V> FluentPattern<T, V> anyOf(Pattern<T, ? extends V> ... choices) {
 		return this.fluent(this.wrap(new AnyOfPattern<>(choices)));
-	}
-
-	public <V> PatternDeclaration<T, V> declare(final String description) {
-		return new PatternDeclarationImpl<>(description);
 	}
 
 	@SafeVarargs
@@ -62,10 +69,6 @@ public abstract class GrammarSugar<T, R> {
 
 	public <V> FluentPattern<T, Tree> oneOrMore(Pattern<T, V> element) {
 		return this.fluent(this.wrap(new OneOrMorePattern<>(element)));
-	}
-
-	public FluentPattern<T, Tree> optional(Pattern<T, ?> element) {
-		return this.fluent(this.wrap(new OptionalPattern<>(element)));
 	}
 
 	public FluentPattern<T, Tree> repeat(Pattern<T, ?> pattern, Integer minOccurs, Integer maxOccurs, boolean greedy) {
@@ -84,11 +87,17 @@ public abstract class GrammarSugar<T, R> {
 		return repeat(pattern, occurs, false);
 	}
 
-	public FluentPattern<T, Tree> anyToken() {
-		return this.fluent(this.wrap(new AnyTokenPattern<>()));
+	public FluentPattern<T, Tree> delimitedList(final Pattern<T, ?> element, final Pattern<T, ?> sperator, Integer minOccurs, Integer maxOccurs) {
+		return this.fluent(this.wrap(new DelimitedListPattern<T>(element, sperator, minOccurs, maxOccurs)));
 	}
 
+	public FluentPattern<T, Tree> delimitedList(final Pattern<T, ?> element, final Pattern<T, ?> sperator, Integer minOccurs) {
+		return this.fluent(this.wrap(new DelimitedListPattern<T>(element, sperator, minOccurs)));
+	}
 
+	public FluentPattern<T, Tree> delimitedList(final Pattern<T, ?> element, final Pattern<T, ?> sperator) {
+		return this.fluent(this.wrap(new DelimitedListPattern<T>(element, sperator)));
+	}
 
 
 	// value transforming shortcuts
