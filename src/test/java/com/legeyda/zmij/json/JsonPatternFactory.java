@@ -1,17 +1,14 @@
-package com.legeyda.json;
+package com.legeyda.zmij.json;
 
 import com.legeyda.zmij.sugar.CharGrammarSugar;
 import com.legeyda.zmij.pattern.Pattern;
 import com.legeyda.zmij.pattern.PatternDeclaration;
 import com.legeyda.zmij.tree.Tree;
-import com.legeyda.zmij.util.ListCharSequence;
 
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.util.*;
 
 public class JsonPatternFactory extends CharGrammarSugar {
-
 
 	protected Map<String, Object> createMap(final Iterable<Map.Entry<String, Object>> items) {
 		final Map<String, Object> result = new HashMap<>();

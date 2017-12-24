@@ -1,4 +1,4 @@
-package com.legeyda.json;
+package com.legeyda.zmij.json;
 
 import com.legeyda.zmij.pattern.CharPatternCase;
 import com.legeyda.zmij.result.Failure;
