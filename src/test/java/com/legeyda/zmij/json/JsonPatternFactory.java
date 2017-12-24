@@ -7,20 +7,9 @@ import com.legeyda.zmij.tree.Tree;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class JsonPatternFactory extends CharGrammarSugar {
-
-	protected Map<String, Object> createMap(final Iterable<Map.Entry<String, Object>> items) {
-		final Map<String, Object> result = new HashMap<>();
-		for(Map.Entry<String, Object> entry: items) {
-			result.put(entry.getKey(), entry.getValue());
-		}
-		return result;
-	}
-
-	protected Character createChar(final String hex) {
-		return (char)Long.parseLong(hex, 16);
-	}
 
 	protected BigDecimal pow(BigDecimal a, BigDecimal b) {
 		return BigDecimal.valueOf(Math.pow(a.doubleValue(), b.doubleValue()));
@@ -55,7 +44,7 @@ public class JsonPatternFactory extends CharGrammarSugar {
 		)
 				.description("unicode letter by code")
 				.asString()
-				.map(this::createChar);
+				.map(hex->(char)Long.parseLong(hex, 16));
 
 		// character is either exact charactor, or escape sequence, or unicode code defined above
 		final Pattern<Character,  Character> character = anyOf(
@@ -98,7 +87,11 @@ public class JsonPatternFactory extends CharGrammarSugar {
 				.values()
 				.map(both -> ((BigDecimal)both.get(1)).multiply(BigDecimal.valueOf((Integer)both.get(0))));
 
-		final Pattern<Character, BigDecimal> unsignedFloat = sequence(nonZeroDigit, zeroOrMore(digit), constant('.'), oneOrMore(digit))
+		final Pattern<Character, BigDecimal> unsignedFloat = sequence(
+				nonZeroDigit,
+				zeroOrMore(digit),
+				optional(sequence(constant('.'), oneOrMore(digit)))
+		)
 				.asString()
 				.map(BigDecimal::new);
 
@@ -109,24 +102,19 @@ public class JsonPatternFactory extends CharGrammarSugar {
 
 		final Pattern<Character, Number> number = sequence(
 				whiteSpace,
-				anyOf(signedFloat, signedInteger),
-				optional(sequence(
+				anyOf(
+					sequence(
+						signedFloat,
 						whiteList('e', 'E').forget(),
 						signedInteger
-				)),
+					)
+							.values()
+							.<List<BigDecimal>>cast()
+							.map(list->list.get(0).multiply(pow(BigDecimal.TEN, list.get(1)))),
+					signedFloat
+				),
 				whiteSpace
-		)
-				.values()
-				.description("number")
-				.map(list -> {
-					if(list.size()==2) {
-						return ((BigDecimal)list.get(0)).multiply(
-								pow(BigDecimal.TEN, (BigDecimal)list.get(1))
-						);
-					} else {
-						return (BigDecimal)list.get(0);
-					}
-				});
+		).description("number").value().cast();
 
 
 		// ======== array ========
@@ -156,7 +144,7 @@ public class JsonPatternFactory extends CharGrammarSugar {
 		final Pattern<Character, Map<String, Object>> members = delimitedList(member, comma)
 				.values()
 				.<List<Map.Entry<String, Object>>>cast()
-				.map(this::createMap);
+				.map(list->list.stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
 		final Pattern<Character, Map<String, Object>> object = sequence(
 				whiteSpace,
