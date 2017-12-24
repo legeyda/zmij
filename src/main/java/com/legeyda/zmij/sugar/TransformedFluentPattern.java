@@ -1,20 +1,18 @@
-package com.legeyda.zmij.pattern.impl.fluent;
+package com.legeyda.zmij.sugar;
 
 import com.google.common.base.Strings;
 import com.legeyda.zmij.input.ParsingContext;
 import com.legeyda.zmij.passage.Passage;
 import com.legeyda.zmij.passage.impl.TransformedPassage;
-import com.legeyda.zmij.pattern.FluentPattern;
 import com.legeyda.zmij.pattern.Pattern;
 import com.legeyda.zmij.result.Result;
 import com.legeyda.zmij.result.Value;
 import com.legeyda.zmij.tree.Tree;
 import com.legeyda.zmij.tree.impl.EmptyTree;
-import com.legeyda.zmij.transform.impl.CompositeFunction;
 
 import java.util.function.Function;
 
-public class TransformedFluentPattern<T, R, RR> extends FluentPatternBase<T, RR> {
+public class TransformedFluentPattern<T, R, RR> extends FluentPattern<T, RR> {
 
 	private final String description;
 	private final Pattern<T, R> pattern;
@@ -49,7 +47,7 @@ public class TransformedFluentPattern<T, R, RR> extends FluentPatternBase<T, RR>
 
 	@Override
 	public Passage<RR> apply(final ParsingContext<T> input) {
-		return new TransformedPassage<R, RR>(this.pattern.apply(input), this.function);
+		return new TransformedPassage<>(this.pattern.apply(input), this.function);
 	}
 
 	// fluent pattern
@@ -64,9 +62,7 @@ public class TransformedFluentPattern<T, R, RR> extends FluentPatternBase<T, RR>
 		return new TransformedFluentPattern<>(
 				this.description,
 				this.pattern,
-				new CompositeFunction<Result<R>, Result<RR>, Result<V>>(
-						this.function,
-						function));
+				this.function.andThen(function));
 	}
 
 

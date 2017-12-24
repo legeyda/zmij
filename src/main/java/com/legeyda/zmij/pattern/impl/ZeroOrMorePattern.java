@@ -35,7 +35,7 @@ public class ZeroOrMorePattern<T> extends BasePattern<T, Tree> {
 			final List<Tree> children = new LinkedList<>();
 			Result<?> result;
 			while((result = passage.get()).isPresent()) {
-				children.add(new AnythingAsTree(Tag.REPEAT_ITEM, result.value()));
+				children.add(AnythingAsTree.create(Tag.REPEAT_ITEM, result.value()));
 			}
 			return new Value<>(new ValuelessBranch(Tag.REPEAT, children));
 		});

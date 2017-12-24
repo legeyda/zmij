@@ -41,7 +41,7 @@ public class ConcatInput<T> implements Input<T> {
 		if(!queue.isEmpty()) {
 			return queue.peek().get();
 		} else {
-			throw new IllegalStateException("trying to get from invalid input");
+			throw new IllegalStateException("trying to any2value from invalid input");
 		}
 	}
 

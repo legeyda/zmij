@@ -1,14 +1,13 @@
-package com.legeyda.zmij.pattern.impl.fluent;
+package com.legeyda.zmij.sugar;
 
 import com.legeyda.zmij.input.ParsingContext;
 import com.legeyda.zmij.passage.Passage;
-import com.legeyda.zmij.pattern.FluentPattern;
 import com.legeyda.zmij.pattern.Pattern;
 import com.legeyda.zmij.result.Result;
 
 import java.util.function.Function;
 
-public class FluentPatternImpl<T, R> extends FluentPatternBase<T, R> {
+public class FluentPatternImpl<T, R> extends FluentPattern<T, R> {
 
 	private final Pattern<T, R> pattern;
 

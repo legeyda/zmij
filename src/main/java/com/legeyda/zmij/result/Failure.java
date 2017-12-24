@@ -1,5 +1,7 @@
 package com.legeyda.zmij.result;
 
+import com.legeyda.zmij.transform.OptFunction;
+
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -11,6 +13,9 @@ public class Failure<T> implements Result<T> {
 		this.message = message;
 	}
 
+	public Failure(final Failure<?> failure) {
+		this.message = failure.message();
+	}
 
 
 	@Override

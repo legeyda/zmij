@@ -3,6 +3,8 @@ package com.legeyda.zmij.passage.impl;
 import com.legeyda.zmij.input.Input;
 import com.legeyda.zmij.passage.Passage;
 import com.legeyda.zmij.result.Result;
+import com.legeyda.zmij.tree.Tag;
+import com.legeyda.zmij.tree.Tree;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +20,14 @@ public class MemoizingPassage<T, R> extends PassageDecorator<R> {
 		private final Long newPosition;
 
 		public Item(final Result<R> result, final Long newPosition) {
+			if(result.isPresent()
+					&& result.value() instanceof Tree
+					&& ((Tree)result.value()).tag() == Tag.TOKEN
+					&& ((Tree)result.value()).value().isPresent()
+					&& ((Tree)result.value()).value().get() instanceof Character
+					&& ((Character)((Tree)result.value()).value().get())=='}') {
+				int x= 0;
+			}
 			this.result = result;
 			this.newPosition = newPosition;
 		}
@@ -35,7 +45,7 @@ public class MemoizingPassage<T, R> extends PassageDecorator<R> {
 		}
 
 		public Optional<Long> newPosition() {
-			return Optional.of(newPosition);
+			return Optional.ofNullable(newPosition);
 		}
 
 	}
@@ -56,6 +66,10 @@ public class MemoizingPassage<T, R> extends PassageDecorator<R> {
 			if(cached.newPosition().isPresent()) {
 				final Long newPosition = cached.newPosition().get();
 				while (this.input.valid() && !Objects.equals(newPosition, this.input.get().position())) {
+					this.input.advance();
+				}
+			} else {
+				while (this.input.valid()) {
 					this.input.advance();
 				}
 			}

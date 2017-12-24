@@ -1,28 +1,46 @@
 package com.legeyda.json;
 
-import com.legeyda.zmij.impl.BaseCharacterPatternFactory;
+import com.legeyda.zmij.sugar.CharGrammarSugar;
 import com.legeyda.zmij.pattern.Pattern;
 import com.legeyda.zmij.pattern.PatternDeclaration;
 import com.legeyda.zmij.tree.Tree;
-import com.legeyda.zmij.tree.Trees;
 import com.legeyda.zmij.util.ListCharSequence;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.*;
 
-public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
+public class JsonPatternFactory extends CharGrammarSugar<Object> {
 
 
-	@Override
+	protected Map<String, Object> createMap(final Iterable<Map.Entry<String, Object>> items) {
+		final Map<String, Object> result = new HashMap<>();
+		for(Map.Entry<String, Object> entry: items) {
+			result.put(entry.getKey(), entry.getValue());
+		}
+		return result;
+	}
+
+	protected Character createChar(final String hex) {
+		return (char)Long.parseLong(hex, 16);
+	}
+
+	protected BigDecimal pow(BigDecimal a, BigDecimal b) {
+		return BigDecimal.valueOf(Math.pow(a.doubleValue(), b.doubleValue()));
+	}
+
 	public Pattern<Character, Object> get() {
 
 		// since it's circular dependency, declare now, implement later
-		PatternDeclaration<Character, Object> value = declare("any piece of data");
+		PatternDeclaration<Character, Object> value = declare("");
 
 
+		// zero or more occurences of any of white-space-characters
 		final Pattern<Character, Tree> whiteSpace = zeroOrMore(whiteList(' ', '\t', '\n', '\r'))
 				.description("optional white space")
 				.forget();
 
+		// literal comma, embraced by optional white space
 		final Pattern<Character, Tree> comma  = sequence(whiteSpace, constant(','), whiteSpace)
 				.description("comma")
 				.forget();
@@ -33,17 +51,19 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 
 		final Pattern<Character, ?> doubleQuote = constant('"').forget();
 
+		// '\n', then exactly four hexademical digits
 		final Pattern<Character,  Character> unicode = sequence(
 				constant("\\u").forget(),
-				repeat(whiteList("0123456789ABCDEF"), 4, false)// .map(asString());
+				repeat(whiteList("0123456789ABCDEF"), 4, false)
 		)
-				.listValues()
-				.map((list) -> (char)Long.parseLong("" + new ListCharSequence((List<Character>)(List)list), 16))
-				.description("unicode code");
-		//      .map(
+				.description("unicode letter by code")
+				.asString()
+				.map(this::createChar);
 
+		// character is either exact charactor, or escape sequence, or unicode code defined above
 		final Pattern<Character,  Character> character = anyOf(
-				blackList('\\', '"').map(t->(Character)t.value().get()),
+				// akList('\\', '"').value(Character.class)
+				blackList('\\', '"').map(value().flatCast(Character.class).orRaise()),
 				constant("\\\"").save('"'),
 				constant("\\\\").save('\\'),
 				constant("\\/") .save('/'),
@@ -58,50 +78,42 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 		final Pattern<Character, String> string = sequence(
 				whiteSpace, doubleQuote, zeroOrMore(character), doubleQuote, whiteSpace
 		)
-//				.listValues()
-//				.map(seq -> "" + new ListCharSequence(Trees.childValues(seq.children().get(2))))
-
-
-				.map(seq -> "" + new ListCharSequence(Trees.childValues(seq.children().get(2))))
-				.description("string");
+				.description("string")
+				.asString();
 
 
 		// ======== number =========
 
-		final Pattern<Character, Character> digit = whiteList("1234567890").value();
+		final Pattern<Character, Character> digit = whiteList("1234567890")
+				.value().cast(Character.class);
 
-		final Pattern<Character, Character> nonZeroDigit = whiteList("123456789").value();
+		final Pattern<Character, Character> nonZeroDigit = whiteList("123456789")
+				.value().cast(Character.class);
 
-		final Pattern<Character, Long> optSign = optional(whiteList('+', '-'))
-				.optValue()
-				.map(opt->opt.map(s->'-'==(Character)s ? -1L : 1L).orElse(1L));
-		//      .map(value().orElse('+').andThen(mapping('+', 1L, '-', -1L).orThrow()))
-		//      .map(value().map(mapping('+', 1L, '-', -1L)).orElse(1L)))
+		final Pattern<Character, Integer> optSign = optional(whiteList('+', '-'))
+				.map(value().flatCast(Character.class).map(s->'-'==s ? -1 : 1).orElse((1)));
+;
+		final Pattern<Character, BigDecimal> unsignedInteger = sequence(digit, zeroOrMore(nonZeroDigit))
+				.asString()
+				.map(BigDecimal::new);
 
-		final Pattern<Character, Long> unsignedInteger = sequence(digit, zeroOrMore(nonZeroDigit))
-				.listValues()
-				.map(list->Long.valueOf(new ListCharSequence((List<Character>)(List<?>)list).toString()));
+		final Pattern<Character, BigDecimal> signedInteger = sequence(optSign, unsignedInteger)
+				.values()
+				.map(both -> ((BigDecimal)both.get(1)).multiply(BigDecimal.valueOf((Integer)both.get(0))));
 
-		final Pattern<Character, Long> signedInteger = sequence(optSign, unsignedInteger)
-				.map(seq ->
-						(Long)seq.children().get(0).value().get() * (Long)seq.children().get(1).value().get());
-		//              .map(values()
-		//                         .<List<Long>>cast()
-		//                         .andThen(list->list.get(0) * list.get(1)));
+		final Pattern<Character, BigDecimal> unsignedFloat = sequence(zeroOrMore(nonZeroDigit), constant('.'), oneOrMore(digit))
+				.asString()
+				.map(BigDecimal::new);
 
-		final Pattern<Character, Double> unsignedFloat = sequence(zeroOrMore(nonZeroDigit), constant('.'), oneOrMore(digit))
-				.listValues()
-				.map(list->Double.valueOf(new ListCharSequence((List<Character>)(List<?>)list).toString()));
-
-		final Pattern<Character, Double> signedFloat = sequence(optSign, unsignedFloat)
-				.map(seq ->
-						(Long)seq.children().get(0).value().get() * (Double)seq.children().get(1).value().get());
+		final Pattern<Character, BigDecimal> signedFloat = sequence(optSign, unsignedFloat)
+				.values()
+				.map(both -> ((BigDecimal)both.get(1)).multiply(BigDecimal.valueOf((Integer)both.get(0))));
 
 
 
 		//final Pattern<Character, Double> floating = sequence(signedInteger, optional());
 
-		final Pattern<Character, Number> jsonNumber = sequence(
+		final Pattern<Character, Number> number = sequence(
 				whiteSpace,
 				anyOf(signedFloat, signedInteger),
 				optional(sequence(
@@ -110,67 +122,60 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 				)),
 				whiteSpace
 		)
-				.listValues()
+				.values()
 				.description("number")
 				.map(list -> {
 					if(list.size()==2) {
-						return ((Number)list.get(0)).doubleValue() * Math.pow(10.0, ((Number)list.get(1)).doubleValue());
+						return ((BigDecimal)list.get(0)).multiply(
+								pow(BigDecimal.TEN, (BigDecimal)list.get(1))
+						);
 					} else {
-						return (Number)list.get(0);
+						return (BigDecimal)list.get(0);
 					}
 				});
-		//      .map(values())
-		// whiteList('e', 'E').forget();
 
 
 		// ======== array ========
 		final Pattern<Character, List<Object>> elements = sequence(value, zeroOrMore(sequence(comma, value)))
 				.description("array elements")
-				.listValues();
-		//      .map(listValues());
+				.values();
 
-		final Pattern<Character, List<?>> array = sequence(
+		final Pattern<Character, List<Object>> array = sequence(
 				whiteSpace,
-				constant("["),
+				constant("[").forget(),
 				whiteSpace,
 				optional(elements),
 				whiteSpace,
-				constant("]"),
+				constant("]").forget(),
 				whiteSpace
 		)
 				.description("array")
-				.map(seq -> (List<?>)seq.children().get(3).value().orElse(new LinkedList<>()));
-		//      .map().value().map().orElse(new LinkedList<>()));
-
+				.values();
 
 		// ======== object ========
 		final Pattern<Character, Map.Entry<String, Object>> member =
 				sequence(whiteSpace, string, whiteSpace, constant(':').forget(), whiteSpace, value, whiteSpace)
-						.listValues()
+						.values()
 						.map(list->new AbstractMap.SimpleEntry<>(list.get(0).toString(), list.get(1)));
 
 
 		final Pattern<Character, Map<String, Object>> members = sequence(member, zeroOrMore(sequence(comma, member)))
-				.listValues()
-				.map(entries -> {
-					final Map<String, Object> result = new HashMap<>();
-					for(Map.Entry<String, Object> entry: (List<Map.Entry<String, Object>>)(Object)entries) {
-						result.put(entry.getKey(), entry.getValue());
-					}
-					return result;
-				});
+				.values()
+				.<List<Map.Entry<String, Object>>>cast()
+				.map(this::createMap);
 
 		final Pattern<Character, Map<String, Object>> object = sequence(
 				whiteSpace,
-				constant("{"),
+				constant("{").forget(),
 				whiteSpace,
 				optional(members),
 				whiteSpace,
-				constant("}"),
+				constant("}").forget(),
 				whiteSpace
 		)
 				.description("object")
-				.map(seq -> (Map<String, Object>)seq.children().get(3).value().orElse(new HashMap<>()));
+				.map(value().orElse(new HashMap<>()))
+				.cast();
 
 
 
@@ -193,8 +198,9 @@ public class JsonPatternFactory extends BaseCharacterPatternFactory<Object> {
 
 		//
 
-		value.implement(anyOf(
-				string, jsonNumber, object, array, truth, lie, nil));
+		value.implement(
+				anyOf(string, number, object, array, truth, lie, nil).description("hello")
+		);
 
 		return value;
 	}

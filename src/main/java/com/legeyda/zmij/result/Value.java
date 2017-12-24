@@ -1,5 +1,7 @@
 package com.legeyda.zmij.result;
 
+import com.legeyda.zmij.transform.OptFunction;
+
 import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;

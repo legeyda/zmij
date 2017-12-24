@@ -10,24 +10,24 @@ import java.util.Optional;
 
 public class AnythingAsTree extends TreeDecorator {
 
-	private static Tree any2tree(final Tag tag, final Object anything) {
+	public static Tree create(final Tag tag, final Object anything) {
 		if(anything instanceof Tree) {
 			return (Tree)anything;
 		} else if(anything instanceof Iterable<?>) {
 			final List<Tree> children = new LinkedList<>();
 			for (final Object child : (Iterable) anything) {
-				children.add(any2tree(Tag.ITEM, child));
+				children.add(create(Tag.ITEM, child));
 			}
 			return new ValuelessBranch(tag, children);
 		} else if(anything instanceof Result<?>) {
 			if(((Result<?>)anything).isPresent()) {
-				return any2tree(tag,((Result<?>)anything).value());
+				return create(tag,((Result<?>)anything).value());
 			} else {
 				return EmptyTree.INSTANCE;
 			}
 		} else if(anything instanceof Optional<?>) {
 			if(((Optional<?>)anything).isPresent()) {
-				return any2tree(tag,((Optional<?>)anything).get());
+				return create(tag,((Optional<?>)anything).get());
 			} else {
 				return EmptyTree.INSTANCE;
 			}
@@ -37,7 +37,7 @@ public class AnythingAsTree extends TreeDecorator {
 	}
 
 	public AnythingAsTree(final Tag tag, final Object anything) {
-		super(any2tree(tag, anything));
+		super(create(tag, anything));
 	}
 
 	public AnythingAsTree(final Tree wrapee) {

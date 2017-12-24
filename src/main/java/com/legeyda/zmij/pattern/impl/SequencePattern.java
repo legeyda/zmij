@@ -39,7 +39,7 @@ public class SequencePattern<T> extends BasePattern<T, Tree> {
 			for(final Pair<Pattern<T, ?>, Passage<?>> pair: new PairIterable<>(elements, passages)) {
 				final Result<?> child = pair.getB().get();
 				if(child.isPresent()) {
-					result.add(new AnythingAsTree(Tag.SEQUENCE_ITEM, child));
+					result.add(AnythingAsTree.create(Tag.SEQUENCE_ITEM, child));
 				} else {
 					return this.createFailure(input, String.format("expected %s", pair.getA().description()));
 				}

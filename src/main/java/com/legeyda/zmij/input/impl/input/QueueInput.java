@@ -25,7 +25,7 @@ public class QueueInput<T> implements Input<T> {
 	@Override
 	public Item<T> get() {
 		if(!this.valid()) {
-			throw new IllegalStateException("trying to get from invalid input");
+			throw new IllegalStateException("trying to any2value from invalid input");
 		}
 		return this.data.peek();
 	}

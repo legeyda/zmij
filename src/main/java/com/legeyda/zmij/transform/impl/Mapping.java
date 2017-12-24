@@ -1,11 +1,13 @@
 package com.legeyda.zmij.transform.impl;
 
+import com.legeyda.zmij.transform.OptFunction;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class Mapping<T, R> extends BaseFluentOptFunction<T, R> {
+public class Mapping<T, R> implements OptFunction<T, R> {
 
 	private final Map<T, R> rules;
 

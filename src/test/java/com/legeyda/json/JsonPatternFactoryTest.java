@@ -5,6 +5,7 @@ import com.legeyda.zmij.result.Failure;
 import com.legeyda.zmij.result.Value;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -41,29 +42,43 @@ public class JsonPatternFactoryTest {
 
 	@Test
 	public void testNumber() {
+		final String error = "at pos 0: expected any of:\n" +
+				"\tstring, \n" +
+				"\tnumber, \n" +
+				"\tobject, \n" +
+				"\tarray, \n" +
+				"\ttrue, \n" +
+				"\tfalse, \n" +
+				"\tnull";
 
 		new CharPatternCase<>(
 				new JsonPatternFactory().get(),
 				"  42  ",
-				new Value<>(42L)
+				new Value<>(new BigDecimal(42L))
 		).run();
 
 		new CharPatternCase<>(
 				new JsonPatternFactory().get(),
 				"  42.42  ",
-				new Value<>(42.42D)
+				new Value<>(new BigDecimal("42.42"))
 		).run();
 
 		new CharPatternCase<>(
 				new JsonPatternFactory().get(),
-				"  42.42e42  ",
-				new Value<>(42.42e42)
+				"  4.2e42  ",
+				new Value<>(new BigDecimal("4.20e42"))
+		).run();
+
+		new CharPatternCase<>(
+				new JsonPatternFactory().get(),
+				"  not-a-number  ",
+				new Failure<>(error)
 		).run();
 
 		new CharPatternCase<>(
 				new JsonPatternFactory().get(),
 				"    ",
-				new Failure<>("blabla")
+				new Failure<>(error)
 		).run();
 	}
 

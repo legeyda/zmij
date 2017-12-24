@@ -10,7 +10,7 @@ public interface Input<T> extends Supplier<Item<T>> {
 	/** goto next position */
 	void advance();
 
-	/** get character&position currently standing on */
+	/** any2value character&position currently standing on */
 	@Override
 	Item<T> get();
 

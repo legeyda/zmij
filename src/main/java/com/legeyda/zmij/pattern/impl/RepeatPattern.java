@@ -42,7 +42,7 @@ public class RepeatPattern<T> extends BasePattern<T, Tree> {
 			final List<Tree> found = new LinkedList<>();
 			Result<?> result;
 			while((result = passage.get()).isPresent()) {
-				found.add(new AnythingAsTree(Tag.REPEAT_ITEM, result.value()));
+				found.add(AnythingAsTree.create(Tag.REPEAT_ITEM, result.value()));
 
 				if(!this.greedy && this.maxOccurs == found.size()) {
 					break;

@@ -1,19 +1,21 @@
-package com.legeyda.zmij.impl;
+package com.legeyda.zmij.sugar;
 
-import com.legeyda.zmij.PatternFactory;
-import com.legeyda.zmij.pattern.FluentPattern;
 import com.legeyda.zmij.pattern.Pattern;
 import com.legeyda.zmij.pattern.PatternDeclaration;
 import com.legeyda.zmij.pattern.impl.*;
-import com.legeyda.zmij.pattern.impl.fluent.FluentPatternImpl;
+import com.legeyda.zmij.transform.OptFunction;
+import com.legeyda.zmij.transform.impl.AnyToValue;
+import com.legeyda.zmij.transform.impl.Cast;
+import com.legeyda.zmij.tree.Tag;
 import com.legeyda.zmij.tree.Tree;
+import com.legeyda.zmij.tree.impl.AnythingAsTree;
 import com.legeyda.zmij.tree.impl.EmptyTree;
 
-import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
-public abstract class BasePatternFactory<T, R> implements PatternFactory<T, R> {
+public abstract class GrammarSugar<T, R> {
 
 	public <V> FluentPattern<T, V> fluent(final Pattern<T, V> wrapee) {
 		return new FluentPatternImpl<>(new MemoizingPattern<>(wrapee));
@@ -23,10 +25,10 @@ public abstract class BasePatternFactory<T, R> implements PatternFactory<T, R> {
 		return new MemoizingPattern<>(wrapee);
 	}
 
-	/** */
-	public <V> Pattern<T, Tree> skip(Pattern<T, V> pattern) {
-		return this.fluent(pattern).map(t-> EmptyTree.INSTANCE);
-	}
+
+
+
+	// pattern construction shortcuts
 
 	public FluentPattern<T, Tree> constant(Iterable<T> match) {
 		return this.fluent(this.wrap(new ConstantPattern<>(match)));
@@ -87,7 +89,10 @@ public abstract class BasePatternFactory<T, R> implements PatternFactory<T, R> {
 	}
 
 
-	//////////////////
+
+
+	// value transforming shortcuts
+
 
 	public <V, S> Function<V, S> fix(final S value) {
 		return v->value;
@@ -97,7 +102,16 @@ public abstract class BasePatternFactory<T, R> implements PatternFactory<T, R> {
 		return v->EmptyTree.INSTANCE;
 	}
 
-//	public <V> Function<Tree, List<V>> values() {
-//
-//	}
+	public <V> OptFunction<V, Object> value() {
+		return AnyToValue.create();
+	}
+
+	public <S> OptFunction<Object, S> cast(Class<S> clazz) {
+		return Cast.create(clazz);
+	}
+
+	public <S> OptFunction<Object, S> cast() {
+		return Cast.create();
+	}
+
 }

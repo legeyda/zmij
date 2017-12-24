@@ -34,7 +34,7 @@ public class OptionalPattern<T, R> extends BasePattern<T, Tree> {
 		return new SuppliedPassage<>(() -> new Try<Savepoint, Result<Tree>>(save -> {
 			final Result<R> result = passage.get();
 			if(result.isPresent()) {
-				return new Value<>(new AnythingAsTree(Tag.OPTIONAL_PRESENT, result));
+				return new Value<>(AnythingAsTree.create(Tag.OPTIONAL_PRESENT, result));
 			} else {
 				return new Value<>(new ValuelessLeaf(Tag.OPTIONAL_ABSENT));
 			}
