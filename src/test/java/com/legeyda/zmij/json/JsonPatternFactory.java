@@ -7,21 +7,23 @@ import com.legeyda.zmij.tree.Tree;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-public class JsonPatternFactory extends CharGrammarSugar {
+public class JsonPatternFactory extends CharGrammarSugar implements Supplier<Pattern<Character, Object>> {
 
 	protected BigDecimal pow(BigDecimal a, BigDecimal b) {
 		return BigDecimal.valueOf(Math.pow(a.doubleValue(), b.doubleValue()));
 	}
 
+	@Override
 	public Pattern<Character, Object> get() {
 
 		// since there's circular dependency, declare now, implement later
 		PatternDeclaration<Character, Object> value = declare("");
 
 
-		// zero or more occurences of any of white-space-characters
+		// zero or more occurrences of any of white-space-characters
 		final Pattern<Character, Tree> whiteSpace = zeroOrMore(whiteList(' ', '\t', '\n', '\r'))
 				.description("optional white space")
 				.forget();
@@ -37,7 +39,7 @@ public class JsonPatternFactory extends CharGrammarSugar {
 
 		final Pattern<Character, ?> doubleQuote = constant('"').forget();
 
-		// '\n', then exactly four hexademical digits
+		// back-slash then u, then exactly four hexademical digits
 		final Pattern<Character,  Character> unicode = sequence(
 				constant("\\u").forget(),
 				repeat(whiteList("0123456789ABCDEF"), 4, false)
@@ -135,10 +137,17 @@ public class JsonPatternFactory extends CharGrammarSugar {
 				.values();
 
 		// ======== object ========
-		final Pattern<Character, Map.Entry<String, Object>> member =
-				sequence(whiteSpace, string, whiteSpace, constant(':').forget(), whiteSpace, value, whiteSpace)
-						.values()
-						.map(list->new AbstractMap.SimpleEntry<>(list.get(0).toString(), list.get(1)));
+		final Pattern<Character, Map.Entry<String, Object>> member = sequence(
+				whiteSpace,
+				string,
+				whiteSpace,
+				constant(':').forget(),
+				whiteSpace,
+				value,
+				whiteSpace
+		)
+				.values()
+				.map(list->new AbstractMap.SimpleEntry<>(list.get(0).toString(), list.get(1)));
 
 
 		final Pattern<Character, Map<String, Object>> members = delimitedList(member, comma)
