@@ -28,7 +28,7 @@ public class JsonPatternFactory extends CharGrammarSugar {
 
 	public Pattern<Character, Object> get() {
 
-		// since it's circular dependency, declare now, implement later
+		// since there's circular dependency, declare now, implement later
 		PatternDeclaration<Character, Object> value = declare("");
 
 
