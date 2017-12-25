@@ -64,16 +64,10 @@ public class JsonPatternFactory extends CharGrammarSugar implements Supplier<Pat
 
 		// ======== number =========
 
-		final Pattern<Character, Character> digit = whiteList("1234567890")
-				.value().cast(Character.class);
-
-		final Pattern<Character, Character> nonZeroDigit = whiteList("123456789")
-				.value().cast(Character.class);
-
 		final Pattern<Character, Integer> optSign = optional(whiteList('+', '-'))
 				.map(value().flatCast(Character.class).map(s->'-'==s ? -1 : 1).orElse((1)));
 
-		final Pattern<Character, BigDecimal> unsignedInteger = sequence(nonZeroDigit, zeroOrMore(digit))
+		final Pattern<Character, BigDecimal> unsignedInteger = sequence(nonZeroDigit(), zeroOrMore(digit()))
 				.asString()
 				.map(BigDecimal::new);
 
@@ -82,9 +76,9 @@ public class JsonPatternFactory extends CharGrammarSugar implements Supplier<Pat
 				.map(both -> ((BigDecimal)both.get(1)).multiply(BigDecimal.valueOf((Integer)both.get(0))));
 
 		final Pattern<Character, BigDecimal> unsignedFloat = sequence(
-				nonZeroDigit,
-				zeroOrMore(digit),
-				optional(sequence(constant('.'), oneOrMore(digit)))
+				nonZeroDigit(),
+				zeroOrMore(digit()),
+				optional(sequence(constant('.'), oneOrMore(digit())))
 		)
 				.asString()
 				.map(BigDecimal::new);
@@ -191,8 +185,7 @@ public class JsonPatternFactory extends CharGrammarSugar implements Supplier<Pat
 	protected BigDecimal pow(BigDecimal a, BigDecimal b) {
 		return BigDecimal.valueOf(Math.pow(a.doubleValue(), b.doubleValue()));
 	}
-
-
+	
 }
 ```
 Step two. Parse string.
