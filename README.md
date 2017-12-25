@@ -43,7 +43,6 @@ public class JsonPatternFactory extends CharGrammarSugar implements Supplier<Pat
 
 		// character is either exact charactor, or escape sequence, or unicode code defined above
 		final Pattern<Character,  Character> character = anyOf(
-				// akList('\\', '"').value(Character.class)
 				blackList('\\', '"').map(value().flatCast(Character.class).orRaise()),
 				constant("\\\"").save('"'),
 				constant("\\\\").save('\\'),
