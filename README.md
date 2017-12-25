@@ -72,7 +72,7 @@ public class JsonPatternFactory extends CharGrammarSugar implements Supplier<Pat
 
 		final Pattern<Character, Integer> optSign = optional(whiteList('+', '-'))
 				.map(value().flatCast(Character.class).map(s->'-'==s ? -1 : 1).orElse((1)));
-;
+
 		final Pattern<Character, BigDecimal> unsignedInteger = sequence(nonZeroDigit, zeroOrMore(digit))
 				.asString()
 				.map(BigDecimal::new);
