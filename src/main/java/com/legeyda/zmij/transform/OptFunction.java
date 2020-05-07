@@ -22,6 +22,10 @@ public interface OptFunction<T, R> extends FluentFunction<T, Optional<R>> {
 		return t -> this.apply(t).flatMap(then::apply);
 	}
 
+	default <V> OptFunction<T, V> flatMap(Function<? super R, V> then) {
+		return t -> this.apply(t).flatMap(v -> Optional.of(then.apply(v)));
+	}
+
 	default <V> OptFunction<T, V> flatCast(Class<V> clazz) {
 		return this.flatCast();
 	}
@@ -42,6 +46,10 @@ public interface OptFunction<T, R> extends FluentFunction<T, Optional<R>> {
 			return Optional.of(v);
 		};
 	};
+
+	default OptFunction<T, String> flatAsString() {
+		return this.flatMap(v->Optional.of(v.toString()));
+	}
 
 
 

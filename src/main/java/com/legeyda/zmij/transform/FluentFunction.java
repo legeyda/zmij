@@ -15,4 +15,8 @@ public interface FluentFunction<T, R> extends Function<T, R> {
 		return this.cast();
 	}
 
+	default Function<T, String> asString() {
+		return this.andThen(Object::toString);
+	}
+
 }
